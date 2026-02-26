@@ -119,6 +119,15 @@ th, td {
     margin: 0 auto;
 }
 
+.text__column {
+    grid-gap: 2rem;
+}
+
+.container {
+    padding: 3rem;
+    align-items: center;
+}
+
 .full__four_column {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -147,7 +156,7 @@ th, td {
 }
 
 .article__border_right:not(:last-of-type) {
-    border-right: 1px dashed #222;
+    border-right: 1px dashed #d9d9d9;
 }
 
 .gap__3_rem {
@@ -191,4 +200,16 @@ th, td {
     display: none;
   }
 
+}
+
+.full__three_column {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 1rem;
+    margin: 1rem;
+}
+
+.full__four_column {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
 }
