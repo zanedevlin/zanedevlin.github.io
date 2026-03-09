@@ -213,3 +213,8 @@ th, td {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
 }
+
+.span__2_col {
+    grid-column: span 2;
+}
+
