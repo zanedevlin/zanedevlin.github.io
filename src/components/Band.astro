@@ -1,14 +1,19 @@
 ---
 const { bandTitle } = Astro.props;
 ---
-<section>
-    <div>
-        <div>
+
+<div class="full__purple_band">
+    <div class="container full__three_column gap__3_rem">
+        <div class="span__2_col">
             <h2>{bandTitle}</h2>
             <p>
-                <slot/>
+                <slot />
             </p>
         </div>
-        <img src = "/img/picture_placeholder.png" alt = "Image placeholder" />
+        <div
+            style="align-self: stretch; background: url('/img/picture_placeholder.png') center / contain no-repeat;"
+            aria-hidden="true"
+        >
+        </div>
     </div>
-</section>
+</div>
