@@ -1,0 +1,131 @@
+name: "Progress Report — Personak Portfolio"
+description: "Use this form to report progress on a personal portfolio built with Astro and React. Include links, screenshots, current status, and any frontend/code-review concerns."
+title: "Progress Report"
+labels:
+  - progress
+  - portfolio
+  - frontend-review
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Quick instructions
+        Fill out the fields below to capture status, links, key code snippets, and areas where you want a front-end review. Attach screenshots where helpful.
+  - type: input
+    attributes:
+      label: "Project name"
+      description: "Name of the portfolio project"
+      placeholder: "My Portfolio"
+      required: true
+  - type: input
+    attributes:
+      label: "Reporter (GitHub handle)"
+      description: "Who is filling this report"
+      placeholder: "@your-username"
+  - type: dropdown
+    attributes:
+      label: "Current status"
+      description: "Select the best-fit status"
+      options:
+        - Not started
+        - In progress
+        - Feature complete
+        - Polishing / QA
+        - Blocked
+        - Deployed
+      required: true
+  - type: checkboxes
+    attributes:
+      label: "Pages / features implemented"
+      options:
+        - Home / Landing
+        - About
+        - Projects / Portfolio grid
+        - Project detail pages
+        - Blog / Posts
+        - Contact / Form
+        - Theme toggle (dark/light)
+        - Responsive layout
+        - Search / Filters
+        - CMS / Content integration
+  - type: checkboxes
+    attributes:
+      label: "Tech & integrations"
+      description: "Select what you're using"
+      options:
+        - Astro
+        - React components (Astro islands)
+        - TypeScript
+        - Tailwind CSS
+        - CSS Modules / Component CSS
+        - PostCSS
+        - Vite
+        - Netlify
+        - Vercel
+        - GitHub Pages
+  - type: input
+    attributes:
+      label: "Deployed site URL"
+      description: "If deployed, paste the public URL"
+      placeholder: "https://example.com"
+  - type: input
+    attributes:
+      label: "Branch / Commit / PR"
+      description: "Link to branch, commit SHA, or PR for review"
+      placeholder: "branch-name or https://github.com/.../pull/123"
+  - type: textarea
+    attributes:
+      label: "Summary of what works"
+      description: "Briefly describe implemented features and behaviors"
+      placeholder: "What's done and how it behaves"
+      required: true
+  - type: textarea
+    attributes:
+      label: "Known issues / blockers"
+      description: "Describe bugs, blockers, or outstanding tasks"
+      placeholder: "E.g., hydration bug with React component, slow images, etc."
+  - type: textarea
+    attributes:
+      label: "Relevant code or file paths"
+      description: "Paste short code snippets or list key file paths (components, routes, Astro pages). For larger snippets, link to the commit/PR."
+      placeholder: "src/components/Toggle.jsx\nsrc/pages/index.astro\n\n// small snippet..."
+  - type: checkboxes
+    attributes:
+      label: "Frontend code-review checklist"
+      description: "Select areas to review or confirm"
+      options:
+        - Semantic HTML (headings, landmarks, main, nav)
+        - Responsive layout / mobile-first
+        - Accessibility (ARIA, keyboard navigation)
+        - Color contrast / theme support
+        - Image optimization & srcset / lazy-loading
+        - Use of Astro islands / correct client directives (client:load, client:idle, client:only)
+        - Component reuse / prop clarity
+        - State management minimal & local where appropriate
+        - CSS strategy consistent (Tailwind / scoped / BEM)
+        - SEO meta tags & Open Graph
+        - Bundle size / tree-shaking concerns
+        - Performance (Lighthouse scores, large JS avoidance)
+  - type: input
+    attributes:
+      label: "Lighthouse / Performance notes"
+      description: "Optional: paste key scores or notes (Performance / Accessibility / SEO)"
+      placeholder: "Perf: 75, A11y: 90, SEO: 85"
+  - type: checkboxes
+    attributes:
+      label: "Testing"
+      options:
+        - Unit tests (Jest / Vitest)
+        - Integration tests
+        - End-to-end tests (Playwright / Cypress)
+        - Manual QA checklist
+  - type: attachments
+    attributes:
+      label: "Screenshots / Assets"
+      description: "Attach screenshots, test outputs, or screenshots of Lighthouse reports"
+  - type: textarea
+    attributes:
+      label: "What help do you need?"
+      description: "Be specific: point to files/lines, describe expected vs actual, or request guidance on architecture, performance, accessibility, or Astro ↔ React integration."
+      placeholder: "E.g., Review Toggle.jsx hydration, advise image optimization, suggest accessible markup for card list"
+      required: true
