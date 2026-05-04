@@ -1,9 +1,156 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-const pageTitle = "Filmmaking";
+import FilmmakingLayout from '../layouts/FilmmakingLayout.astro';
+const pageTitle = "Film-making";
+
+const videos = [
+  {
+    title: "Chumbawamba - Tubthumping",
+    description: "Music video for Chumbawamba's 'Tubthumping'. A high-energy visual interpretation of this iconic track.",
+    thumbnail: "/video-thumb-tubthumping.jpg",
+    youtubeId: "PaPgR2zqfUc",
+    category: "Personal"
+  },
+  {
+    title: "Sheepskin",
+    description: "A dark comedy short film exploring the psychological toll of assimilation in corporate spaces. Directed by Kofi Mensah, this surreal narrative follows a Black professional's desperate attempt to fit into a predominantly white institution, using body horror and dark humor to critique the cost of conforming to systems not built for you.",
+    thumbnail: "/sheepskin-thumb.jpg",
+    youtubeId: "LRjfJfM7vA8",
+    category: "Collaborations",
+    involvement: ["Director of Photography", "Actor"]
+  }
+];
 ---
-<BaseLayout pageTitle={pageTitle}>
-    <section class="placeholder-page">
-        <p>Filmmaking work coming soon.</p>
-    </section>
-</BaseLayout>
+
+<FilmmakingLayout pageTitle={pageTitle}>
+  <div class="filmmaking-page">
+    <!-- Tab Navigation - Centered -->
+    <div class="tab-nav-wrapper">
+      <div class="tab-nav">
+        <button class="tab active" data-tab="personal">Personal</button>
+        <button class="tab" data-tab="collaborations">Collaborations</button>
+      </div>
+    </div>
+
+    <!-- Videos Grid -->
+    <div class="videos-grid" id="personal">
+      {videos.filter(v => v.category === "Personal").map(video => (
+        <div class="video-tile" data-video-id={video.youtubeId} data-video-title={video.title}>
+          <div class="video-thumbnail">
+            <img src={video.thumbnail} alt={video.title} />
+            <div class="play-button">
+              <svg viewBox="0 0 24 24" fill="white">
+                <polygon points="5 3 19 12 5 21" />
+              </svg>
+            </div>
+          </div>
+          <div class="video-info">
+            <h3>{video.title}</h3>
+            <p>{video.description}</p>
+            <button class="watch-btn" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline; margin-right: 8px;">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              WATCH
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="videos-grid" id="collaborations" style="display: none;">
+      {videos.filter(v => v.category === "Collaborations").map(video => (
+        <div class="video-tile" data-video-id={video.youtubeId} data-video-title={video.title}>
+          <div class="video-thumbnail">
+            <img src={video.thumbnail} alt={video.title} />
+            <div class="play-button">
+              <svg viewBox="0 0 24 24" fill="white">
+                <polygon points="5 3 19 12 5 21" />
+              </svg>
+            </div>
+          </div>
+          {video.involvement && (
+            <div class="involvement-badges">
+              {video.involvement.map(role => (
+                <span class="involvement-badge">{role}</span>
+              ))}
+            </div>
+          )}
+          <div class="video-info">
+            <h3>{video.title}</h3>
+            <p>{video.description}</p>
+            <button class="watch-btn" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline; margin-right: 8px;">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              WATCH
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Video Modal -->
+  <div id="videoModal" class="video-modal">
+    <div class="modal-content">
+      <button class="modal-close" type="button">&times;</button>
+      <div class="modal-video-wrapper">
+        <iframe 
+          id="videoPlayer"
+          width="100%" 
+          height="600" 
+          src="" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      </div>
+      <h2 id="videoTitle" style="margin-top: 20px; color: white;"></h2>
+    </div>
+  </div>
+</FilmmakingLayout>
+
+<script>
+  // Handle video tile clicks
+  document.querySelectorAll('.video-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const youtubeId = tile.dataset.videoId;
+      const title = tile.dataset.videoTitle;
+      
+      const modal = document.getElementById('videoModal');
+      const iframe = document.getElementById('videoPlayer');
+      const titleEl = document.getElementById('videoTitle');
+      
+      iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
+      titleEl.textContent = title;
+      modal.style.display = 'flex';
+    });
+  });
+
+  // Close modal when clicking outside
+  document.getElementById('videoModal').addEventListener('click', (e) => {
+    if (e.target.id === 'videoModal') {
+      document.getElementById('videoModal').style.display = 'none';
+      document.getElementById('videoPlayer').src = '';
+    }
+  });
+
+  // Close modal button
+  document.querySelector('.modal-close').addEventListener('click', () => {
+    document.getElementById('videoModal').style.display = 'none';
+    document.getElementById('videoPlayer').src = '';
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      document.querySelectorAll('.videos-grid').forEach(grid => grid.style.display = 'none');
+      document.getElementById(tabName).style.display = 'grid';
+    });
+  });
+</script>
