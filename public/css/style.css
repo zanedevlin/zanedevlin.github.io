@@ -1,0 +1,425 @@
+@font-face {
+    font-family: 'HowTo';
+    src: url('/fonts/HoW_tO_dO_SoMeThInG.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --red: #BB2523;
+    --dark: #2B2B2C;
+    --white: #ffffff;
+    --light-gray: #f0f0f0;
+}
+
+/* ─── Reset ─────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'HowTo', Arial, sans-serif;
+    background-color: var(--dark);
+    color: var(--dark);
+}
+
+main > h1:first-child {
+    display: none;
+}
+
+/* ─── Header ─────────────────────────────────── */
+.site-header {
+    background-color: var(--red);
+    color: var(--white);
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.site-title {
+    font-family: "Rubik Glitch", system-ui;
+    font-size: 3rem;
+    margin: 0;
+}
+
+.header-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+}
+
+.header-icon {
+    width: 100px;
+    height: 100px;
+}
+
+.site-subtitle {
+    font-family: 'HowTo', Arial, sans-serif;
+    font-size: 1rem;
+    margin: 8px 0 0 0;
+    letter-spacing: 0.05em;
+}
+
+/* ─── Navigation ─────────────────────────────── */
+.nav {
+    background-color: var(--dark);
+    padding: 20px 10px;
+    text-align: center;
+}
+
+.nav a {
+    color: var(--white);
+    margin: 0 20px;
+    text-decoration: none;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nav a:hover {
+    text-decoration: underline;
+}
+
+/* ─── Wave Dividers ──────────────────────────── */
+.wave-divider {
+    display: block;
+    line-height: 0;
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.wave-divider svg {
+    width: 100%;
+    height: 160px;
+    display: block;
+}
+
+.wave-divider--top {
+    margin-top: -125px;
+    background: transparent;
+}
+
+.wave-divider--bottom {
+    margin-top: 0;
+    margin-bottom: 0;
+    background: var(--dark);
+    position: relative;
+    z-index: 0;
+}
+
+/* ─── About Section ──────────────────────────── */
+.about-section {
+    background-color: var(--dark);
+    color: var(--white);
+    padding: 60px 40px 80px;
+}
+
+.about-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 50px;
+    max-width: 960px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.about-image {
+    width: 100%;
+}
+
+.portrait {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.about-text h2 {
+    font-family: 'HowTo', Arial, sans-serif;
+    font-size: 2.2rem;
+    margin: 0 0 20px 0;
+    font-weight: normal;
+}
+
+.about-text p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    margin: 0 0 16px 0;
+}
+
+.relocating-note {
+    font-style: italic;
+    color: #aaa;
+    font-size: 1rem !important;
+}
+
+.about-contact {
+    margin-top: 28px;
+    border-top: 1px solid #444;
+    padding-top: 20px;
+}
+
+.contact-label {
+    font-weight: normal;
+    font-size: 1rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px !important;
+    color: #aaa;
+}
+
+.about-contact a {
+    color: var(--white);
+    text-decoration: underline;
+    font-size: 1.1rem;
+}
+
+.about-contact a:hover {
+    color: #ddd;
+}
+
+/* ─── Portfolio Split ────────────────────────── */
+
+.portfolio-split {
+    --bolt-top:    -100px;
+    --bolt-bottom: 300px;
+    --bolt-hover:  120px;
+
+    position: relative;
+    height: 500px;
+    overflow: hidden;
+}
+
+.split-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 28px;
+    text-decoration: none;
+    background-size: cover;
+    background-position: center;
+    transition: clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.split-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    filter: blur(0px);
+    transition: filter 0.4s ease;
+    z-index: 0;
+}
+
+.portfolio-split:has(.split-filmmaking:hover) .split-art::before {
+    filter: blur(4px);
+}
+.portfolio-split:has(.split-art:hover) .split-filmmaking::before {
+    filter: blur(4px);
+}
+
+.split-filmmaking {
+    background-color: #b0b8d4;
+    background-image: url('/filmmaking-bg.jpg');
+    z-index: 1;
+    clip-path: polygon(
+        0% 0%,
+        calc(50% - var(--bolt-top)) 0%,
+        calc(50% + var(--bolt-bottom)) 100%,
+        0% 100%
+    );
+}
+
+.split-art {
+    background-color: #8a93b5;
+    background-image: url('/art-bg.jpg');
+    z-index: 1;
+    clip-path: polygon(
+        calc(50% - var(--bolt-top) - 170px) 0%,
+        100% 0%,
+        100% 100%,
+        calc(50% + var(--bolt-bottom) - 170px) 100%
+    );
+}
+
+.portfolio-split:has(.split-filmmaking:hover) .split-filmmaking {
+    clip-path: polygon(
+        0% 0%,
+        calc(50% - var(--bolt-top) + var(--bolt-hover)) 0%,
+        calc(50% + var(--bolt-bottom) + var(--bolt-hover)) 100%,
+        0% 100%
+    );
+}
+.portfolio-split:has(.split-filmmaking:hover) .split-art {
+    clip-path: polygon(
+        calc(50% - var(--bolt-top) - 170px + var(--bolt-hover)) 0%,
+        100% 0%,
+        100% 100%,
+        calc(50% + var(--bolt-bottom) - 170px + var(--bolt-hover)) 100%
+    );
+}
+.portfolio-split:has(.split-art:hover) .split-filmmaking {
+    clip-path: polygon(
+        0% 0%,
+        calc(50% - var(--bolt-top) - var(--bolt-hover)) 0%,
+        calc(50% + var(--bolt-bottom) - var(--bolt-hover)) 100%,
+        0% 100%
+    );
+}
+.portfolio-split:has(.split-art:hover) .split-art {
+    clip-path: polygon(
+        calc(50% - var(--bolt-top) - 170px - var(--bolt-hover)) 0%,
+        100% 0%,
+        100% 100%,
+        calc(50% + var(--bolt-bottom) - 170px - var(--bolt-hover)) 100%
+    );
+}
+
+.split-label {
+    font-family: 'HowTo', Arial, sans-serif;
+    font-size: 2.5rem;
+    font-weight: normal;
+    color: var(--white);
+    line-height: 1.1;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9);
+}
+
+.portfolio-split:has(.split-filmmaking:hover) .split-filmmaking .split-label {
+    opacity: 1;
+    margin-bottom: 80px;
+    margin-left: 200px;
+}
+.portfolio-split:has(.split-art:hover) .split-art .split-label {
+    opacity: 1;
+}
+
+.split-art .split-label {
+    margin-left: auto;
+    margin-bottom: 80px;
+    margin-right: 200px;
+}
+
+.bolt-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1080px;
+    z-index: 2;
+    pointer-events: none;
+    transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bolt-divider svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.portfolio-split:has(.split-filmmaking:hover) .bolt-divider {
+    left: calc(50% + var(--bolt-hover));
+}
+.portfolio-split:has(.split-art:hover) .bolt-divider {
+    left: calc(50% - var(--bolt-hover));
+}
+
+/* ─── Footer ─────────────────────────────────── */
+.site-footer {
+    background-color: var(--red);
+    color: var(--white);
+    padding: 80px 24px;
+    position: relative;
+    z-index: 1;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+}
+
+.footer-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+}
+
+.footer-link:last-child {
+    justify-content: flex-end;
+}
+
+.footer-icon {
+    width: 36px;
+    height: 36px;
+    filter: brightness(0) invert(1);
+}
+
+.footer-wordmark {
+    font-family: Arial, sans-serif;
+    font-size: 1.4rem;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    text-align: center;
+    color: var(--white);
+}
+
+/* ─── Placeholder Pages ──────────────────────── */
+.placeholder-page {
+    padding: 80px 30px;
+    text-align: center;
+    color: var(--white);
+    font-size: 1rem;
+}
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 650px) {
+    .header-inner {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .about-inner {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .about-section {
+        padding: 40px 24px 60px;
+    }
+
+    .portfolio-split {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+    }
+
+    .split-panel {
+        position: relative;
+        inset: auto;
+        height: 220px;
+        clip-path: none !important;
+    }
+
+    .split-label {
+        opacity: 1;
+    }
+
+    .bolt-divider {
+        display: none;
+    }
+}

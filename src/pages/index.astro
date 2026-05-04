@@ -1,8 +1,10 @@
 ---
-const pageTitle = "Landing";
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AboutSection from '../components/AboutSection.astro';
+import PortfolioSplit from '../components/PortfolioSplit.astro';
+const pageTitle = "Zane Devlin";
 ---
-<BaseLayout pageTitle = {pageTitle}>
-    <!-- astro <slot /> -->
-    Lorem ipsum.
+<BaseLayout pageTitle={pageTitle}>
+    <PortfolioSplit />
+    <AboutSection />
 </BaseLayout>

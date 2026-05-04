@@ -1,8 +1,6 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-const pageTitle = "About";
+// about.astro is no longer a standalone page.
+// All "about" content lives on the homepage (index.astro).
+// This redirect ensures any old /about links go home.
+return Astro.redirect('/');
 ---
-<BaseLayout pageTitle = {pageTitle}>
-    <!-- astro <slot /> -->
-    Unlorem ipsum.
-</BaseLayout>
