@@ -1,0 +1,17 @@
+---
+import ArtDesignLayout from '../../layouts/ArtDesignLayout.astro';
+import PostersSlider from '../../components/PostersSlider.jsx';
+---
+
+<ArtDesignLayout pageTitle="Posters" backUrl="/art-design">
+  <div class="project-page">
+    <div class="project-page-title-bar">Posters</div>
+    <PostersSlider client:load />
+    <div class="project-page-body">
+      <div class="project-meta">
+        <span class="project-type">Graphic Design</span>
+      </div>
+      <p class="project-page-description">A collection of posters created across various projects over the years. Each slide links back to the project it originated from.</p>
+    </div>
+  </div>
+</ArtDesignLayout>

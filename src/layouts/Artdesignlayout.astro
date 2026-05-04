@@ -1,5 +1,5 @@
 ---
-const { pageTitle } = Astro.props;
+const { pageTitle, backUrl = "/" } = Astro.props;
 import Footer from '../components/Footer.astro';
 ---
 <!DOCTYPE html>
@@ -18,11 +18,11 @@ import Footer from '../components/Footer.astro';
 		<header class="site-header">
 			<div class="header-inner">
 				<div class="header-left">
-					<a href="/" class="back-link">← Back</a>
+					<a href={backUrl} class="back-link">← Back</a>
 				</div>
 				<div class="header-center">
 					<h1 class="site-title">Zane Devlin</h1>
-					<p class="site-subtitle">(Filmmaking)</p>
+					<p class="site-subtitle">(Art / Design)</p>
 				</div>
 				<div class="header-right"></div>
 				<div class="header-menu">
