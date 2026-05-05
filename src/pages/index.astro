@@ -1,10 +1,12 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import AboutSection from '../components/AboutSection.astro';
-import PortfolioSplit from '../components/PortfolioSplit.astro';
 const pageTitle = "Zane Devlin";
+import BaseLayout from "../Layouts/BaseLayout.astro";
+import PortfolioSplit from "../components/PortfolioSplit.astro";
+import AboutSection from "../components/AboutSection.astro";
 ---
 <BaseLayout pageTitle={pageTitle}>
-    <PortfolioSplit />
-    <AboutSection />
+    <div>
+        <PortfolioSplit />
+        <AboutSection />
+    </div>
 </BaseLayout>
