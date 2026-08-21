@@ -124,14 +124,29 @@ main > h1:first-child {
     align-items: start;
 }
 
+/* .about-contact used to be nested inside .about-text (HTML-wise); it's
+   now a sibling of .about-image/.about-text so it can be grid-placed
+   independently per breakpoint (see the mobile override, where it spans
+   full width below the image+text row instead of trailing inside the
+   text column). Explicit placement here reproduces the exact same
+   arrangement the old nested markup gave for free on desktop: the image
+   spans both rows on the left, text top-right, contact bottom-right. */
 .about-image {
     width: 100%;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+}
+
+.about-text {
+    grid-column: 2;
+    grid-row: 1;
 }
 
 .portrait {
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 8px;
 }
 
 .about-text h2 {
@@ -153,6 +168,8 @@ main > h1:first-child {
 }
 
 .about-contact {
+    grid-column: 2;
+    grid-row: 2;
     margin-top: 28px;
     border-top: 1px solid #444;
     padding-top: 20px;
@@ -179,10 +196,26 @@ main > h1:first-child {
 
 /* ─── Portfolio Split ────────────────────────── */
 
+/* Wraps .split-mobile-hint + .portfolio-split. Only exists so the mobile
+   "TAP A SIDE" instruction has somewhere to live in normal document flow,
+   as a real sibling block *before* .portfolio-split rather than absolutely
+   positioned on top of it - see .split-mobile-hint below. No styling of
+   its own on desktop. */
+.portfolio-split-wrap {
+    position: relative;
+}
+
 .portfolio-split {
     --bolt-top:    -100px;
     --bolt-bottom: 300px;
     --bolt-hover:  120px;
+    /* How far .split-art's clip-path (and the bolt divider) sit shifted
+       from .split-filmmaking's - i.e. how much wider the right (art)
+       wedge is than the left one at rest. Pulled out as its own variable
+       (rather than the literal 170px it used to be, inline in each
+       clip-path below) purely so the max-width:768px block further down
+       can override it - see the comment there for why. */
+    --bolt-art-offset: 170px;
 
     position: relative;
     height: 500px;
@@ -213,10 +246,12 @@ main > h1:first-child {
     z-index: 0;
 }
 
-.portfolio-split:has(.split-filmmaking:hover) .split-art::before {
+.portfolio-split:has(.split-filmmaking:hover) .split-art::before,
+.portfolio-split.demo-active-filmmaking .split-art::before {
     filter: blur(4px);
 }
-.portfolio-split:has(.split-art:hover) .split-filmmaking::before {
+.portfolio-split:has(.split-art:hover) .split-filmmaking::before,
+.portfolio-split.demo-active-art .split-filmmaking::before {
     filter: blur(4px);
 }
 
@@ -237,14 +272,15 @@ main > h1:first-child {
     background-image: url('/art-bg.jpg');
     z-index: 1;
     clip-path: polygon(
-        calc(50% - var(--bolt-top) - 170px) 0%,
+        calc(50% - var(--bolt-top) - var(--bolt-art-offset)) 0%,
         100% 0%,
         100% 100%,
-        calc(50% + var(--bolt-bottom) - 170px) 100%
+        calc(50% + var(--bolt-bottom) - var(--bolt-art-offset)) 100%
     );
 }
 
-.portfolio-split:has(.split-filmmaking:hover) .split-filmmaking {
+.portfolio-split:has(.split-filmmaking:hover) .split-filmmaking,
+.portfolio-split.demo-active-filmmaking .split-filmmaking {
     clip-path: polygon(
         0% 0%,
         calc(50% - var(--bolt-top) + var(--bolt-hover)) 0%,
@@ -252,15 +288,17 @@ main > h1:first-child {
         0% 100%
     );
 }
-.portfolio-split:has(.split-filmmaking:hover) .split-art {
+.portfolio-split:has(.split-filmmaking:hover) .split-art,
+.portfolio-split.demo-active-filmmaking .split-art {
     clip-path: polygon(
-        calc(50% - var(--bolt-top) - 170px + var(--bolt-hover)) 0%,
+        calc(50% - var(--bolt-top) - var(--bolt-art-offset) + var(--bolt-hover)) 0%,
         100% 0%,
         100% 100%,
-        calc(50% + var(--bolt-bottom) - 170px + var(--bolt-hover)) 100%
+        calc(50% + var(--bolt-bottom) - var(--bolt-art-offset) + var(--bolt-hover)) 100%
     );
 }
-.portfolio-split:has(.split-art:hover) .split-filmmaking {
+.portfolio-split:has(.split-art:hover) .split-filmmaking,
+.portfolio-split.demo-active-art .split-filmmaking {
     clip-path: polygon(
         0% 0%,
         calc(50% - var(--bolt-top) - var(--bolt-hover)) 0%,
@@ -268,12 +306,13 @@ main > h1:first-child {
         0% 100%
     );
 }
-.portfolio-split:has(.split-art:hover) .split-art {
+.portfolio-split:has(.split-art:hover) .split-art,
+.portfolio-split.demo-active-art .split-art {
     clip-path: polygon(
-        calc(50% - var(--bolt-top) - 170px - var(--bolt-hover)) 0%,
+        calc(50% - var(--bolt-top) - var(--bolt-art-offset) - var(--bolt-hover)) 0%,
         100% 0%,
         100% 100%,
-        calc(50% + var(--bolt-bottom) - 170px - var(--bolt-hover)) 100%
+        calc(50% + var(--bolt-bottom) - var(--bolt-art-offset) - var(--bolt-hover)) 100%
     );
 }
 
@@ -290,13 +329,24 @@ main > h1:first-child {
     text-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9);
 }
 
-.portfolio-split:has(.split-filmmaking:hover) .split-filmmaking .split-label {
+.portfolio-split:has(.split-filmmaking:hover) .split-filmmaking .split-label,
+.portfolio-split.demo-active-filmmaking .split-filmmaking .split-label {
     opacity: 1;
+}
+.portfolio-split:has(.split-art:hover) .split-art .split-label,
+.portfolio-split.demo-active-art .split-art .split-label {
+    opacity: 1;
+}
+
+/* Position is set here (not in the :hover rule above) so it never changes
+   on hover/unhover - only opacity does, and that's transitioned. Margin
+   isn't transitioned, so if it changed on hover it would snap back
+   instantly on mouse-out while the label was still fading, flashing the
+   text in its resting spot for a moment. Matches .split-art below, which
+   never had this bug because its position was already set at rest. */
+.split-filmmaking .split-label {
     margin-bottom: 80px;
     margin-left: 200px;
-}
-.portfolio-split:has(.split-art:hover) .split-art .split-label {
-    opacity: 1;
 }
 
 .split-art .split-label {
@@ -324,11 +374,123 @@ main > h1:first-child {
     display: block;
 }
 
-.portfolio-split:has(.split-filmmaking:hover) .bolt-divider {
+.portfolio-split:has(.split-filmmaking:hover) .bolt-divider,
+.portfolio-split.demo-active-filmmaking .bolt-divider {
     left: calc(50% + var(--bolt-hover));
 }
-.portfolio-split:has(.split-art:hover) .bolt-divider {
+.portfolio-split:has(.split-art:hover) .bolt-divider,
+.portfolio-split.demo-active-art .bolt-divider {
     left: calc(50% - var(--bolt-hover));
+}
+
+/* ─── Mobile "tap a side" instruction ────────────
+   Hidden on desktop, where the hover-driven version of this component
+   doesn't need one. Shown (and fully styled) in the max-width:768px block
+   below - see the comment on .split-mobile-hint there and on the markup
+   in PortfolioSplit.astro for why it's a real block above .portfolio-split
+   rather than something layered on top of it. */
+.split-mobile-hint {
+    display: none;
+}
+
+/* ─── Mobile touch-tap teaching indicator ────────
+   The touch-device equivalent of .demo-cursor below. Hidden on desktop;
+   shown and positioned by the max-width:768px block + the script. */
+.touch-ripple {
+    display: none;
+}
+
+.ripple-dot,
+.ripple-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ripple-dot {
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.45);
+}
+
+.ripple-ring {
+    border: 2px solid var(--white);
+    opacity: 0;
+}
+
+/* Toggled on/off by the script for each tap "beat" (see runRippleCycle) -
+   removed and re-added so the animations restart cleanly every time. */
+.touch-ripple--tap .ripple-dot {
+    animation: rippleTapCompress 0.6s ease;
+}
+.touch-ripple--tap .ripple-ring--1 {
+    animation: rippleExpand 0.6s ease-out;
+}
+.touch-ripple--tap .ripple-ring--2 {
+    animation: rippleExpand 0.6s ease-out 0.14s;
+}
+
+@keyframes rippleTapCompress {
+    0%   { transform: translate(-50%, -50%) scale(1); }
+    35%  { transform: translate(-50%, -50%) scale(0.62); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes rippleExpand {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.65; }
+    100% { transform: translate(-50%, -50%) scale(3.4); opacity: 0; }
+}
+
+/* ─── Hover-hint demo (teaches first-time visitors the panels are
+   interactive) - a little cursor glides over to each side in turn every
+   so often, triggering the same hover state as a real mouse would. Stops
+   permanently the moment a real user hovers, clicks, or tabs to a panel.
+   See the script below. ─── */
+.demo-cursor {
+    position: absolute;
+    left: 26%;
+    top: 58%;
+    z-index: 10;
+    width: 40px;
+    height: 52px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: left 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+                top 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.22s ease;
+    /* Layered shadow - a tight dark contact shadow plus a softer, larger
+       one underneath - so the icon reads as sitting above the page rather
+       than blending into it. */
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5))
+            drop-shadow(0 8px 10px rgba(0,0,0,0.55));
+}
+
+.demo-cursor svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.demo-cursor--active {
+    animation: demoCursorPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes demoCursorPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(-50%, -50%) scale(1.12); }
+}
+
+/* No real hover on touch devices, so the "you can hover" hint doesn't
+   apply there - the JS already skips starting the demo on these, this is
+   just a failsafe. */
+@media (hover: none) {
+    .demo-cursor {
+        display: none;
+    }
 }
 
 /* ─── Footer ─────────────────────────────────── */
@@ -400,26 +562,10 @@ main > h1:first-child {
         padding: 40px 24px 60px;
     }
 
-    .portfolio-split {
-        display: flex;
-        flex-direction: column;
-        height: auto;
-    }
-
-    .split-panel {
-        position: relative;
-        inset: auto;
-        height: 220px;
-        clip-path: none !important;
-    }
-
-    .split-label {
-        opacity: 1;
-    }
-
-    .bolt-divider {
-        display: none;
-    }
+    /* Portfolio split's actual mobile styling lives in the max-width:768px
+       block below now (it fully re-declares .portfolio-split/.split-panel/
+       .split-label/.bolt-divider and, being later in the file, wins at
+       this width too) - nothing split-related left to duplicate here. */
 }
 
 /* ─── Filmmaking Page ────────────────────────── */
@@ -493,6 +639,49 @@ main > h1:first-child {
     transform: translateY(-8px);
 }
 
+/* Reminder tiles for stuff that's shot/edited but not uploaded/linked
+   anywhere yet - visually distinct so they don't get mistaken for a real,
+   working tile, and don't invite a click that goes nowhere. */
+.video-tile--placeholder {
+    cursor: default;
+}
+
+.video-tile--placeholder:hover {
+    transform: none;
+}
+
+.thumbnail-placeholder {
+    position: absolute;
+    inset: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    border: 2px dashed rgba(255, 255, 255, 0.35);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+.watch-btn--disabled {
+    padding: 10px 20px;
+    background-color: #555;
+    color: #ccc;
+    border: none;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    cursor: default;
+}
+
 .video-thumbnail {
     position: relative;
     width: 100%;
@@ -539,6 +728,12 @@ main > h1:first-child {
 
 .video-info {
     padding: 0;
+    /* Fill whatever vertical space is left in the tile (grid rows stretch
+       .video-tile to match the tallest tile in the row) so the watch button
+       below can be pinned to the bottom instead of just trailing the text. */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .video-info h3 {
@@ -552,6 +747,40 @@ main > h1:first-child {
     line-height: 1.6;
     margin: 0 0 16px 0;
     color: #aaa;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
+}
+
+/* Line-clamping (see the max-width:768px override below) and the "more"/
+   "less" toggle are mobile-only - there's enough room on desktop/tablet
+   tiles to just show the full description, so p.is-clamped and
+   .clamp-toggle-btn are both no-ops here and only switch on below the
+   mobile breakpoint. See ClampedText in Filmmakingpage.jsx. */
+.clamp-toggle-btn {
+    display: none;
+}
+
+/* "Created by X" credit line, used on tiles for films Zane appeared in but
+   didn't direct (Fine Line, Woodsman) - sits above the description with a
+   visible blank row of its own instead of being folded into the same
+   paragraph. */
+.video-creator {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    color: #aaa;
+}
+
+/* Row holding the watch button (bottom-left) and, optionally, the duration
+   label (bottom-right) - pinned to the bottom of the tile regardless of how
+   much description text sits above it, so tiles with short vs. long copy
+   still line up. */
+.tile-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
 }
 
 .watch-btn {
@@ -566,10 +795,23 @@ main > h1:first-child {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .watch-btn:hover {
     background-color: #1d4ed8;
+}
+
+.duration-label {
+    background-color: #fbbf24;
+    color: #1a1a1a;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
 }
 
 /* Video Modal */
@@ -628,6 +870,249 @@ main > h1:first-child {
     width: 100%;
     height: 100%;
     border-radius: 8px;
+}
+
+/* ─── Collection Modal ───────────────────────── */
+/* Instagram reels don't reliably embed (see the EXTERNAL_ONLY_PLATFORMS
+   note in Filmmakingpage.jsx), so a multi-video Instagram project can't use
+   the regular player modal above. This reuses the same blurred/dimmed
+   .video-modal backdrop and .modal-close button, but swaps the iframe for a
+   small card holding a grid of "sub-tiles" the visitor can pick from, each
+   opening its own reel in a new tab. */
+.modal-content--collection {
+    max-width: 1100px;
+    background-color: var(--dark);
+    border-radius: 12px;
+    padding: 32px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+/* The regular .modal-close sits 50px above .modal-content, which works for
+   the single-video modal (short enough that this lands in the surrounding
+   .video-modal padding). This card is taller and often near the top of the
+   viewport, which pushed that button off-screen - so here it sits inside
+   the card's own top-right corner instead. */
+.modal-content--collection .modal-close {
+    top: 16px;
+    right: 16px;
+    color: var(--white);
+}
+
+.collection-modal-title {
+    color: var(--white);
+    font-size: 1.8rem;
+    font-weight: normal;
+    margin: 0 0 12px 0;
+}
+
+.collection-modal-description {
+    color: #ccc;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 28px 0;
+    max-width: 720px;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
+}
+
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.collection-tile {
+    background-color: var(--red);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    /* .collection-grid stretches every tile in a row to match the tallest
+       one - without this flex column + the flex:1/margin-top:auto pairing
+       below on .collection-tile-info/.collection-tile-footer, that extra
+       height just sits as dead space under the button instead of pinning
+       the WATCH NOW/duration row to the bottom of the tile. */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.collection-tile:hover {
+    transform: translateY(-6px);
+}
+
+.collection-tile-thumbnail {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background-color: #333;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.collection-tile-thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.collection-tile:hover .play-button {
+    background-color: rgba(187, 37, 35, 0.9);
+}
+
+.collection-tile-info h4 {
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: normal;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+}
+
+.collection-tile-info p {
+    color: #ccc;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: break-word;
+}
+
+.collection-tile-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.collection-tile-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.collection-tile-footer .watch-btn {
+    padding: 8px 20px;
+    font-size: 0.78rem;
+}
+
+.collection-tile-footer .duration-label {
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+/* ─── Poster Reminder ────────────────────────── */
+/* A little "Clippy"-style nudge toward the Art/Design posters while a
+   visitor is browsing the film tiles - docked to the right edge of the
+   viewport, fading in once the video grid scrolls into view (see the
+   IntersectionObserver in Filmmakingpage.jsx) and fading out if they
+   scroll away from it. Dismissing it via the close button hides it for
+   the rest of this page load; a fresh visit brings it back. */
+.poster-reminder {
+    position: fixed;
+    bottom: 40px;
+    right: 28px;
+    z-index: 40;
+    width: 260px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(16px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.poster-reminder--visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.poster-reminder-bubble {
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px 30px 22px 20px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.4);
+}
+
+.poster-reminder-bubble p {
+    margin: 0 0 14px 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: #1a1a1a;
+}
+
+.poster-reminder-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: color 0.2s ease;
+}
+
+.poster-reminder-close:hover {
+    color: var(--red);
+}
+
+.poster-reminder-visit-btn {
+    display: inline-block;
+    background-color: #2563eb;
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 26px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    transition: background-color 0.2s ease;
+}
+
+.poster-reminder-visit-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.poster-reminder-tail {
+    position: absolute;
+    bottom: -7px;
+    right: 38px;
+    width: 18px;
+    height: 18px;
+    background-color: #fff;
+    border-radius: 4px;
+    transform: rotate(45deg);
+    z-index: 0;
+}
+
+.poster-reminder-avatar {
+    position: absolute;
+    bottom: -22px;
+    right: 8px;
+    z-index: 2;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #fff;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+}
+
+.poster-reminder-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 #videoTitle {
@@ -732,6 +1217,27 @@ main > h1:first-child {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* ─── Pinned Posters card: mosaic preview of several posters at once ─── */
+.project-image .poster-mosaic {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2px;
+}
+
+.project-image .poster-mosaic img {
+    position: static;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    object-fit: cover;
+    display: block;
 }
 
 .project-content {
@@ -1215,6 +1721,31 @@ main > h1:first-child {
     background-color: var(--dark);
 }
 
+/* Row pairing the contextual back link with the title bar */
+.project-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 40px;
+    padding: 0 20px;
+}
+
+.project-back-link {
+    flex-shrink: 0;
+    color: var(--white);
+    text-decoration: none;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1rem;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.project-back-link:hover {
+    opacity: 1;
+    color: #fbbf24;
+}
+
 /* Full-width title bar across the whole page */
 .project-page-title-bar {
     background-color: var(--white);
@@ -1226,25 +1757,25 @@ main > h1:first-child {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     max-width: 700px;
-    margin: 40px auto 0;
     border-radius: 8px;
 }
 
-/* Slider sits full width with generous height */
-.project-page .image-slider {
-    width: 100%;
-    margin-top: 40px;
+/* Slider + description now live together inside one contained tile */
+.project-tile {
+    max-width: 900px;
+    margin: 40px auto 60px;
+    background: var(--red);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.project-page .image-slider ul li img {
-    height: 620px;
-}
-
-/* Description section below with lots of room */
+/* Description section sits directly below the slider, inside the tile
+   (max-width/margin kept here too since Posters uses this block without
+   the .project-tile wrapper) */
 .project-page-body {
     max-width: 900px;
     margin: 0 auto;
-    padding: 60px 40px 100px;
+    padding: 32px 40px 40px;
 }
 
 .project-page-body .project-meta {
@@ -1252,7 +1783,7 @@ main > h1:first-child {
 }
 
 .project-page-body .project-type {
-    background-color: var(--red);
+    border-left: 3px solid #fbbf24;
 }
 
 .project-page-description {
@@ -1263,38 +1794,70 @@ main > h1:first-child {
     margin: 0;
 }
 
-/* ─── Project Slider ─────────────────────────── */
+/* ─── Project Slider (Instagram-style carousel) ── */
 .image-slider {
-    position: relative;
     width: 100%;
-    overflow: hidden;
-    background: #111;
+    background: var(--red);
 }
 
-.image-slider ul {
+.image-slider-frame {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+}
+
+.image-slider-track {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.image-slider-track ul {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
     width: 100%;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.image-slider ul li {
+.image-slider-track ul li {
     min-width: 100%;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.image-slider ul li img {
-    width: 100%;
-    height: 480px;
-    object-fit: cover;
+.image-slider-track ul li img {
+    /* width/height both auto, capped by max-width/max-height instead of a
+       fixed height + object-fit:contain - the image sizes itself to its
+       own aspect ratio and is only ever scaled down (never stretched or
+       cropped), so its rendered box always matches its visible content
+       exactly, with no leftover gap on any side. That matters because
+       border-radius only rounds this element's own box: the old fixed-
+       height version could leave a transparent gap between the visible
+       photo and the box's real edge whenever a project's images weren't
+       the same shape as that box (e.g. Lego Alic/Organic Technology, both
+       wider than the 480px-tall frame) - and that gap, not the photo, was
+       what the border-radius was rounding, so it never showed. Capping
+       both axes (rather than filling width:100% outright) keeps a very
+       wide or very square project from rendering oversized - see the
+       mobile override below for the smaller cap there. */
     display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 480px;
+    border-radius: 8px;
 }
 
 .image-slider-lr-toggle {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    flex-shrink: 0;
     background: rgba(0, 0, 0, 0.45);
     border: 2px solid rgba(255, 255, 255, 0.6);
     color: var(--white);
@@ -1307,16 +1870,59 @@ main > h1:first-child {
     align-items: center;
     justify-content: center;
     z-index: 5;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease;
     user-select: none;
 }
 
 .image-slider-lr-toggle:hover {
-    background: rgba(187, 37, 35, 0.85);
+    background: rgba(0, 0, 0, 0.7);
+    border-color: #fbbf24;
 }
 
-.left-toggle  { left: 16px; }
-.right-toggle { right: 16px; }
+/* Instagram-style "1 / 4" pill, top-right of the frame */
+.slide-counter {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #fbbf24;
+    color: var(--white);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    z-index: 6;
+}
+
+/* Instagram-style dot pagination, below the frame */
+.slide-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    padding: 16px 0;
+}
+
+.slide-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.slide-dot:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.slide-dot.active {
+    background: #fbbf24;
+    transform: scale(1.3);
+}
 
 /* ─── Home Nav (bigger) ──────────────────────── */
 .nav--home a {
@@ -1340,76 +1946,12 @@ main > h1:first-child {
     border-bottom: 2px solid var(--red);
 }
 
-/* ─── Hamburger Button ───────────────────────── */
-.hamburger {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.6rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.3s ease;
-}
-
-.hamburger:hover {
-    color: var(--red);
-}
-
 /* On home nav, push hamburger to the right */
 .nav--home .hamburger {
     position: absolute;
     right: 40px;
     top: 50%;
     transform: translateY(-50%);
-}
-
-/* ─── Hamburger Overlay Menu ─────────────────── */
-.hamburger-menu {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background-color: rgba(43, 43, 44, 0.97);
-    z-index: 999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 40px;
-}
-
-.hamburger-menu.open {
-    display: flex;
-}
-
-.hamburger-menu a {
-    color: var(--white);
-    text-decoration: none;
-    font-family: 'Chelsea Market', Arial, sans-serif;
-    font-size: 2.5rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    transition: color 0.3s ease;
-}
-
-.hamburger-menu a:hover {
-    color: var(--red);
-}
-
-.hamburger-close {
-    position: absolute;
-    top: 24px;
-    right: 36px;
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 3rem;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    line-height: 1;
-}
-
-.hamburger-close:hover {
-    color: var(--red);
 }
 
 /* ─── Hamburger (in header) ──────────────────── */
@@ -1523,6 +2065,33 @@ main > h1:first-child {
     position: relative;
 }
 
+/* When the menu is open, drop the home page's .wave-divider curve
+   (normally z-index:2) down to z-index:0 - just for the open state.
+   Two earlier attempts didn't work:
+   - Raising .site-header itself to z-index:20 lifted the ENTIRE header
+     (with its own opaque red background) above the curve for its full
+     34px overlap band, at every width - so the curve vanished everywhere
+     behind the header, not just behind the ~220px-wide dropdown box.
+   - Raising just .hamburger-wrap to z-index:20 (so only the button+
+     dropdown pairing out-ranked the curve, not the whole header) was
+     closer, but still left a ~10px sliver of the curve bleeding through
+     the top edge of the dropdown's first item - raising an ancestor
+     doesn't reliably beat a sibling with an explicit z-index across
+     their whole overlap.
+   z-index:0 on the curve itself is the reliable fix: it keeps the curve
+   in the same "stack level 0, tie-broken by DOM order" bucket as
+   .site-header (position:relative, no explicit z-index) - and since the
+   curve comes later in the DOM than the header, DOM order still lets it
+   paint over the header everywhere outside the dropdown, so the curve
+   stays fully visible right up to the dropdown's edges. But z-index:0 is
+   still lower than .hamburger-dropdown's own explicit z-index:9999
+   (a positive z-index always wins over stack-level-0), so the dropdown
+   itself paints cleanly on top with no bleed-through. Scoped to
+   body.menu-open so nothing changes while the menu is closed. */
+body.menu-open .wave-divider {
+    z-index: 0;
+}
+
 .header-hamburger {
     position: absolute;
     top: 50%;
@@ -1559,106 +2128,77 @@ main > h1:first-child {
     z-index: 9999;
 }
 
-/* ─── Dropdown Subsections ───────────────────── */
+/* ─── Hamburger Dropdown Links (flat: Home / Art / Design) ─── */
+/* Base link look (color, font, hover, etc.) comes from .hamburger-dropdown a
+   above - this just adds the separator line between items. */
 .dropdown-item {
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid #3a3a3b;
 }
 
-.dropdown-section {
-    display: flex;
-    flex-direction: column;
-    border-bottom: 1px solid #444;
-}
-
-.dropdown-section:last-child {
+.dropdown-item:last-child {
     border-bottom: none;
 }
 
-.dropdown-heading {
-    font-family: 'Chelsea Market', Arial, sans-serif;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #aaa;
-    padding: 10px 20px 4px;
-}
-
-.dropdown-subitem {
-    color: var(--white);
-    text-decoration: none;
-    font-family: 'Chelsea Market', Arial, sans-serif;
-    font-size: 0.95rem;
-    padding: 8px 20px 8px 28px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: background-color 0.2s ease;
-}
-
-.dropdown-subitem:hover {
-    background-color: var(--red);
-}
-
-/* ─── Collapsible Dropdown ───────────────────── */
+/* ─── Hamburger Dropdown: nested Filmmaking (Personal / Collaborations) ─── */
 .dropdown-section {
-    border-top: 1px solid #3a3a3b;
+    border-bottom: 1px solid #3a3a3b;
 }
 
 .dropdown-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
     background: none;
     border: none;
     color: var(--white);
     font-family: 'Chelsea Market', Arial, sans-serif;
     font-size: 1rem;
+    padding: 14px 20px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    padding: 13px 20px;
-    text-align: left;
     cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     transition: background-color 0.2s ease;
 }
 
 .dropdown-heading:hover {
-    background-color: rgba(255,255,255,0.06);
+    background-color: var(--red);
 }
 
 .dropdown-arrow {
-    font-size: 0.7rem;
-    transition: transform 0.25s ease;
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
 }
 
-.dropdown-section.open .dropdown-arrow {
-    transform: rotate(90deg);
+.dropdown-heading.open .dropdown-arrow {
+    transform: rotate(180deg);
 }
 
 .dropdown-subitems {
-    display: none;
-    flex-direction: column;
-    background-color: rgba(0,0,0,0.2);
+    max-height: 0;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.25);
+    transition: max-height 0.2s ease;
 }
 
-.dropdown-section.open .dropdown-subitems {
-    display: flex;
+.dropdown-subitems.open {
+    max-height: 200px;
 }
 
 .dropdown-subitem {
-    color: #ccc;
+    display: block;
+    color: var(--white);
     text-decoration: none;
     font-family: 'Chelsea Market', Arial, sans-serif;
-    font-size: 0.88rem;
-    padding: 9px 20px 9px 32px;
+    font-size: 0.9rem;
+    padding: 12px 20px 12px 36px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    letter-spacing: 0.06em;
+    transition: background-color 0.2s ease;
 }
 
 .dropdown-subitem:hover {
     background-color: var(--red);
-    color: var(--white);
 }
 
 /* ─── Project card link reset ────────────────── */
@@ -1853,13 +2393,32 @@ a.project-card .project-date {
     position: relative;
 }
 
+/* A small gold pill badge overlaid on the pinned card's thumbnail, instead
+   of a plain unstyled text line above it - sits above the mosaic image and
+   the hover overlay (see z-index) so it's always visible. */
 .pinned-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #fbbf24;
+    color: #1a1a1a;
     font-family: 'Chelsea Market', Arial, sans-serif;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.7);
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0 0 10px 0;
+    letter-spacing: 0.08em;
+    padding: 6px 12px 6px 9px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+}
+
+.pinned-badge-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
 }
 
 /* ─── Poster Caption ─────────────────────────── */
@@ -1899,18 +2458,113 @@ a.project-card .project-date {
     color: #aaa;
 }
 
-/* ─── Posters Slider (9:16 portrait) ─────────── */
-.posters-slider {
+/* ─── Posters Album (grid view) ──────────────── */
+.posters-grid-wrapper {
     background-color: #111;
+    padding: 32px 40px;
+    margin-top: 24px;
+}
+
+.posters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.poster-grid-item {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, outline-color 0.25s ease;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.poster-grid-item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.poster-grid-item:hover,
+.poster-grid-item:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.65);
+    outline-color: #fbbf24;
+}
+
+.poster-grid-item:hover img,
+.poster-grid-item:focus-visible img {
+    transform: scale(1.06);
+}
+
+/* ─── Posters Slider (9:16 portrait, click-through view) ─── */
+.posters-slider {
+    position: relative;
+    background-color: #111;
+    margin-top: 24px;
+}
+
+.posters-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.posters-close-btn:hover {
+    background: rgba(0,0,0,0.75);
+    border-color: #fbbf24;
 }
 
 .posters-track-wrapper {
     position: relative;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 40px 0;
+    padding: 40px 16px;
+}
+
+/* Prev/next arrows are positioned relative to the actual rendered width of
+   the current poster (measured in JS - see halfImgWidth in PostersSlider),
+   so they hug the poster's edges instead of sitting at the far edges of
+   the slider/window. Scoped to posters only - .image-slider-lr-toggle is
+   shared with the plain ProjectSlider, which still uses the static/flex
+   layout. */
+.posters-track-wrapper .image-slider-lr-toggle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+}
+
+.posters-track-clip {
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
 }
 
 .posters-track {
@@ -1919,7 +2573,7 @@ a.project-card .project-date {
     padding: 0;
     display: flex;
     width: 100%;
-    justify-content: center;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .posters-track li {
@@ -1930,13 +2584,17 @@ a.project-card .project-date {
 }
 
 .posters-track li img {
-    height: 600px;
+    /* No max-width cap: some posters aren't 9:16, and capping the width
+       here was forcing object-fit:contain to letterbox them - height alone
+       is enough to size each poster to its own natural aspect ratio. The
+       min() caps against viewport height so a tall/short browser window
+       never forces the poster past what's actually visible. */
+    height: min(78vh, 760px);
     width: auto;
-    max-width: 340px;
+    max-width: 100%;
     object-fit: contain;
     display: block;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 4px;
+    border-radius: 8px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.6);
 }
 
@@ -1985,13 +2643,33 @@ html, body {
 @media (max-width: 768px) {
 
     /* ─── Header ─────────────────────────────── */
+    /* Switched from grid to flex here: .header-left is empty (home page)
+       or holds a short "← Back" link (Filmmaking/Art-Design pages), and a
+       fixed grid-template-columns can't size itself differently per page.
+       Flex lets the back link/hamburger stay content-sized while the title
+       claims whatever space is left, on every page that reuses this header. */
     .header-inner {
-        grid-template-columns: 1fr auto auto;
-        gap: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         padding: 0 16px;
     }
 
     .header-left {
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: flex-start;
+        z-index: 1;
+    }
+
+    /* Home page's camera-lens icon in .header-left has no back link to show
+       in its place, so it stays hidden on mobile as before - this is more
+       specific than the flex rule above, so it wins for the home header
+       only. Filmmaking/Art-Design headers use plain .site-header and keep
+       their "← Back" link visible. */
+    .site-header--home .header-left {
         display: none;
     }
 
@@ -1999,8 +2677,21 @@ html, body {
         display: none;
     }
 
+    /* Taken out of the flex flow and centered on the header itself, rather
+       than just filling the leftover space next to the back link - with
+       the back link and hamburger being different widths, "leftover space"
+       isn't centered on the row, so the title read as pushed toward the
+       left. Absolute-centering keeps it dead-center regardless of what's
+       docked on either side (and regardless of whether the back link is
+       even present, e.g. on the home page). */
     .header-center {
-        text-align: left;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: max-content;
+        max-width: calc(100% - 160px);
+        text-align: center;
         padding: 16px 0;
     }
 
@@ -2020,68 +2711,303 @@ html, body {
         font-size: 0.9rem;
     }
 
+    /* A bit more vertical room than before (was 20px) now that the title
+       below is also slightly smaller - together they keep "Zane Devlin /
+       Filmmaker, Designer, Artist" from feeling cramped against the
+       header's edges. */
     .site-header--home {
-        padding: 20px 16px;
+        padding: 28px 16px;
+    }
+
+    /* Was 2.2rem - reads a little large for how little width a mobile
+       header has to work with alongside the hamburger. */
+    .site-header--home .site-title {
+        font-size: 2rem;
+    }
+
+    /* .header-center is already how the site-header--home title/subtitle
+       block sits: leave its own layout alone, just give it a touch more
+       breathing room top and bottom (was 16px). */
+    .header-center {
+        padding: 20px 0;
     }
 
     .header-menu {
         display: flex;
         align-items: center;
+        flex: 0 0 auto;
+        /* .header-left is display:none on the home page (see above), so
+           .header-menu was often the ONLY in-flow flex child left in
+           .header-inner - and a lone flex child under
+           justify-content:space-between sits at flex-start, not
+           flex-end, which is why the hamburger was landing on the LEFT
+           on the home page specifically (subpages keep the "← Back"
+           link as a second flex sibling, so space-between had something
+           to push against and never showed this bug). margin-left:auto
+           pins it to the right end of the row unconditionally, whether
+           or not a sibling is present - which also fixes the dropdown
+           menu opening mostly off-screen to the left, since its own
+           right:0 rule anchors to wherever this button actually sits. */
+        margin-left: auto;
         padding: 0 0 0 12px;
+        z-index: 1;
+    }
+
+    /* ─── Home page section order ────────────── */
+    /* Swaps "TAP A SIDE" and About Me on the home page - About Me first,
+       then the portfolio split - without touching desktop, which keeps
+       the split first. .home-sections wraps <PortfolioSplit /> and
+       <AboutSection /> in index.astro; PortfolioSplit renders a single
+       .portfolio-split-wrap, while AboutSection renders three siblings
+       (its own wave-divider--top, .about-section, wave-divider--bottom).
+       Everything defaults to flex order:0, so giving only
+       .portfolio-split-wrap a higher order pushes it after all three of
+       AboutSection's pieces - which stay in their existing relative
+       order (order only breaks ties by original position, it doesn't
+       reorder same-order items) - with no need to also touch the wave
+       dividers individually. */
+    .home-sections {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .portfolio-split-wrap {
+        order: 10;
     }
 
     /* ─── Portfolio Split ────────────────────── */
+    /* Real block, not overlaid on .portfolio-split - see the markup
+       comment in PortfolioSplit.astro. Its own padding/background gives
+       it a footprint the bolt (confined to .portfolio-split, below) can
+       never reach into, at any point in the bolt's animated range. */
+    /* Red instead of dark - lines up exactly with the solid red the
+       wave-divider--bottom graphic above it fades down into (its bottom
+       edge is #BB2523, the same red), so the "gradient border" between
+       About Me and Tap A Side reads as one continuous fade into this bar
+       rather than fading to red and then hard-cutting to dark. */
+    .split-mobile-hint {
+        display: block;
+        margin: 0;
+        padding: 18px 16px;
+        background-color: var(--red);
+        color: var(--white);
+        text-align: center;
+        font-family: 'Chelsea Market', Arial, sans-serif;
+        font-size: 1rem;
+        letter-spacing: 0.14em;
+    }
+
+    /* Panels stay side-by-side with the bolt as the diagonal seam between
+       them, exactly like desktop - reusing the same clip-path/bolt-divider
+       rules above rather than a separate mobile layout. Those rules are
+       driven entirely by the --bolt-* custom properties, though, and
+       desktop's values are fixed pixel offsets tuned for a ~1080px-wide
+       split (e.g. --bolt-bottom: 300px is a gentle ~28%-of-width slant
+       there). Kept as literal px on a ~375-428px container, that same
+       300px is 70-80% of the whole width - an extremely steep cut that
+       eats almost the entire panel and clips label text that would
+       otherwise be safely inside it. Overriding all four as percentages
+       (the exact desktop ratios: -100/1080, 300/1080, 170/1080, 120/1080)
+       reproduces the identical *proportional* diagonal at any mobile
+       width instead of a fixed pixel one - the same fix as the bolt
+       width below. */
     .portfolio-split {
-        display: flex;
-        flex-direction: column;
+        --bolt-top: -9.259%;
+        --bolt-bottom: 27.778%;
+        --bolt-art-offset: 15.741%;
+        --bolt-hover: 11.111%;
+        /* Desktop's box is a fixed 1080x500 (a ~2.16:1 ratio) - kept as a
+           fixed 500px height on a ~375-428px-wide mobile screen, it's
+           much *taller*, relatively, than desktop's box, which both made
+           the split section take up way more screen than it should and
+           (see .bolt-divider below) threw off the bolt's own fit inside
+           it. Matching desktop's actual box ratio instead of its literal
+           height means mobile gets a true miniature of the desktop
+           composition - shorter, and with the bolt sized correctly -
+           at any width. */
+        aspect-ratio: 1080 / 500;
         height: auto;
     }
 
-    .split-panel {
-        position: relative;
-        inset: auto;
-        height: 200px;
-        clip-path: none !important;
-    }
-
-    .split-label {
-        opacity: 1 !important;
-        margin: 0 !important;
-        font-size: 1.8rem;
-    }
-
-    .split-filmmaking .split-label,
-    .split-art .split-label {
-        margin-bottom: 20px !important;
-        margin-left: 20px !important;
-        margin-right: 20px !important;
-    }
-
+    /* Desktop's bolt box is exactly the container's own width (1080px
+       both), so the SVG's default meet-fit scales it by *height*
+       (the smaller dimension) and it ends up touching the top and
+       bottom edges, with the leftover width letterboxed evenly on each
+       side. Overriding width down to a fraction (as this used to do)
+       broke that relationship - width became the smaller dimension
+       instead, so the fit scaled by *width*, leaving the bolt too short
+       to reach the top or bottom. Now that .portfolio-split above keeps
+       desktop's exact box ratio, going back to width:100% (matching
+       desktop's width:container-width relationship) reproduces the same
+       height-limited fit - and the same edge-to-edge look - at any
+       mobile size. */
     .bolt-divider {
-        display: none;
+        width: 100%;
+    }
+
+    /* Desktop reveals the label only on hover - there's no hover on a
+       touchscreen, so leaving it opacity:0 at rest would mean it's never
+       seen at all until a tap fires the reveal animation right before
+       navigating away. Always showing it here is the mobile equivalent
+       of desktop's hover reveal. */
+    .split-label {
+        font-size: 1.4rem;
+        opacity: 1 !important;
+    }
+
+    /* Anchors the art label to the TOP of its panel instead of the
+       bottom (see .split-panel's own align-items:flex-end, inherited
+       from desktop) - keeps the two always-visible labels from reading
+       as a matched pair stacked at the same edge, and mirrors how they
+       sit on opposite corners on desktop. Filmmaking stays at the
+       bottom (desktop's default, unchanged). */
+    .split-art {
+        align-items: flex-start;
+    }
+
+    /* Desktop's 28px panel padding eats into the little clear space a
+       ~375-428px screen has beside the (already-shrunk, see
+       .bolt-divider below) bolt - tightening it up gives the label a
+       few more px to clear the diagonal by. */
+    .split-panel {
+        padding: 28px 16px;
+    }
+
+    /* Desktop's fixed 200px label margins assume a ~1080px-wide split;
+       on a ~375-428px mobile screen that pushes the label toward the
+       middle of the panel, straight under the opaque bolt graphic,
+       hiding it entirely. Pinning it to the panel's own outer bottom
+       corner instead keeps it clear of the diagonal seam at any mobile
+       width, on both the resting position (used by :hover/demo-active
+       state changes to transition from) and desktop's own rule below,
+       which these still override at this width. */
+    /* Nudged closer to their respective edges (was 24px each) so the two
+       always-visible labels read as pulled toward opposite corners
+       rather than sitting at a matched, more centered inset. Filmmaking
+       still clears the wave-divider transition below the split (see
+       .wave-divider--top further down) at every mobile width tested. */
+    .split-filmmaking .split-label {
+        margin-bottom: 16px;
+        margin-left: 12px;
+    }
+
+    .split-art .split-label {
+        margin-top: 12px;
+        margin-right: 12px;
+    }
+
+    /* ─── Touch-tap teaching indicator ─────────── */
+    /* Positioned over whichever side is being demoed - the script drives
+       left/top via setRipplePos(), alternating between the filmmaking
+       side (left half) and the art side (right half). No left/top
+       transition (unlike the desktop cursor demo, which glides) - the
+       script only ever repositions it while opacity is 0, so it just
+       appears and disappears at each side rather than sliding across. */
+    .touch-ripple {
+        display: block;
+        position: absolute;
+        left: 25%;
+        top: 50%;
+        z-index: 10;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.22s ease;
     }
 
     /* ─── About Section ──────────────────────── */
+    /* Picture floats top-left instead of sitting in its own grid column,
+       so the heading/paragraph/note wrap along its right edge like body
+       text around a magazine photo, then spill to the full section
+       width once they run past the image's bottom edge. Grid couldn't
+       do this - its two columns size independently, so a short image
+       next to a long text column just left a tall empty gap under the
+       photo instead of the text actually flowing around it. Switching
+       .about-inner out of grid (display:block) lets .about-image's
+       float and .about-text's line boxes interact the normal way. */
     .about-inner {
-        grid-template-columns: 1fr;
-        gap: 30px;
+        display: block;
+    }
+
+    .about-image {
+        float: left;
+        width: 50%;
+        margin: 0 16px 20px 0;
+    }
+
+    .about-text {
+        display: block;
+    }
+
+    /* clear:both drops Contact below the image even on the rare case
+       the photo ends up taller than the wrapped text - without it,
+       Contact could try to slot into leftover space beside the image's
+       bottom edge, the exact problem the float below is fixing. */
+    .about-contact {
+        clear: both;
     }
 
     .about-section {
         padding: 40px 20px 60px;
     }
 
+    /* Fills its float's own width exactly - with that width set to 50%
+       above, this already reads as "50%", so no separate reduction is
+       needed here the way the old single-column layout needed one. */
+    .portrait {
+        width: 100%;
+    }
+
     .about-text h2 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
     }
 
     .about-text p {
-        font-size: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
     }
 
     /* ─── Wave Dividers ──────────────────────── */
+    /* This SVG (see AboutSection.astro) is a red-to-solid-#2B2B2C
+       gradient made of 4 stacked curved layers, meant to transition from
+       the split's photos into the about section's solid dark background
+       - the middle two layers are semi-transparent grey, so however much
+       of the graphic ISN'T overlapping something behind it just reads as
+       a flat grey band with nothing to disguise it. Desktop's -125px
+       margin overlaps 78% of its (unchanged) 160px height, hiding
+       nearly all of that grey transition behind the photo and leaving
+       only a thin red accent + a sliver of solid dark showing. This
+       rule used to be -60px, tuned for the old design's much taller
+       (500px) split, where the split had height to spare; now that
+       .portfolio-split above is only ~175-355px tall, that same -60px
+       overlap left most of the grey transition exposed with nothing
+       behind it - the "grey gap" this is fixing. Shrinking the graphic
+       itself (rather than just deepening the overlap) keeps the
+       overlap shallow enough to stay clear of the filmmaking label
+       sitting in the split's own bottom-left corner, while still hiding
+       nearly all of the grey transition the same way desktop does. */
+    .wave-divider--top svg {
+        height: 46px;
+    }
+
     .wave-divider--top {
-        margin-top: -60px;
+        margin-top: -34px;
+    }
+
+    /* --bottom (see AboutSection.astro) never had a mobile override at
+       all, so it was still rendering its curve at the base 160px-tall
+       viewBox height meant for a ~1400px-wide desktop section - on a
+       ~375-428px mobile screen that same curve, unscaled, reads as a
+       steep, oversized red hump instead of the shallow arc --top has
+       right above it. Unlike --top, no negative margin is needed here:
+       --bottom's own rgba(187,37,35,*) layers are red-on-red (no grey
+       transitional layers the way --top has), and its container already
+       carries background:var(--dark) matching the About section above
+       it, so shrinking just the svg height flattens the curve to match
+       --top's gentleness without leaving anything uncovered to hide. */
+    .wave-divider--bottom svg {
+        height: 46px;
     }
 
     /* ─── Footer ─────────────────────────────── */
@@ -2104,17 +3030,135 @@ html, body {
         padding: 40px 16px 60px;
     }
 
+    /* Two columns instead of one - with ~10+ tiles per category this was a
+       long single-column scroll. minmax(0, 1fr), not plain 1fr: a plain
+       "1fr" track's implicit minimum is its content's min-content size, so
+       a tile with a long unbroken line/word can force its column wider
+       than its half and overflow the row (the same bug the collection
+       breakout grid had - see the .collection-grid comment below). */
     .videos-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
     }
 
+    .video-tile {
+        padding: 12px;
+    }
+
+    .video-thumbnail {
+        margin-bottom: 10px;
+    }
+
+    .play-button {
+        width: 48px;
+        height: 48px;
+    }
+
+    .play-button svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .video-info h3 {
+        font-size: 1rem;
+        margin: 0 0 6px 0;
+    }
+
+    /* At 2 columns these tiles are narrow enough that a single long word
+       regularly doesn't fit on a line and gets bumped to the next one
+       whole, leaving a ragged gap at the end of the line above it - and
+       since different tiles' text breaks at different points, tiles in
+       the same row end up wildly different heights. Hyphenating lets a
+       word split across the line break instead (like body text in print),
+       filling each line more evenly. overflow-wrap/word-break are the
+       fallback for the (rare) browser without hyphens support, so a
+       too-long word still wraps instead of overflowing the tile. */
+    .video-info h3,
+    .video-info p,
+    .video-creator {
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .video-info p,
+    .video-creator {
+        font-size: 0.8rem;
+        line-height: 1.5;
+        margin: 0 0 12px 0;
+    }
+
+    /* Caps the description to a fixed number of lines (set per-instance
+       via the --clamp-lines custom property) so every tile's text block
+       is the same height regardless of how long its description is -
+       mobile-only, since desktop/tablet tiles have room to just show the
+       full text (see the unclamped default above). */
+    p.is-clamped {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: var(--clamp-lines);
+    }
+
+    /* Sized and spaced as a real tap target, with generous room on every
+       side, so it doesn't get fat-fingered along with the WATCH button
+       sitting right below it. */
+    .clamp-toggle-btn {
+        display: inline-block;
+        margin: 6px 0 14px 0;
+        padding: 6px 10px 6px 0;
+        background: none;
+        border: none;
+        color: var(--white);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+        opacity: 0.85;
+    }
+
+    .clamp-toggle-btn:hover {
+        opacity: 1;
+    }
+
+    .collection-tile-info .clamp-toggle-btn {
+        font-size: 0.75rem;
+        margin: 4px 0 10px 0;
+    }
+
+    .tile-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tile-footer .watch-btn {
+        padding: 8px 16px;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+    }
+
+    .tile-footer .duration-label {
+        font-size: 0.68rem;
+        padding: 3px 7px;
+    }
+
+    /* Fluid instead of a fixed pixel width - a fixed width sized for
+       "Personal" was too narrow for "Collaborations" at this font size,
+       so the label overflowed its half of the pill and sat on top of the
+       red/white split. Letting the pill grow with the viewport (up to a
+       cap so it doesn't get silly-wide on a tablet) keeps both labels
+       inside their own half. */
     .seg-control {
-        width: 280px;
+        width: 100%;
+        max-width: 360px;
     }
 
     .seg-label {
-        font-size: 0.85rem;
-        padding: 10px 0;
+        font-size: 0.78rem;
+        letter-spacing: 0.045em;
+        padding: 10px 4px;
     }
 
     /* ─── Video Modal ────────────────────────── */
@@ -2133,6 +3177,111 @@ html, body {
         height: 220px;
     }
 
+    .modal-content--collection {
+        padding: 20px;
+        max-height: 90vh;
+    }
+
+    .collection-modal-title {
+        font-size: 1.4rem;
+    }
+
+    /* Was 2 fixed "1fr 1fr" columns - 1fr's implicit min-width is the
+       content's own min-content size, not 0, so a sub-tile with a long
+       unbroken word/line couldn't shrink to fit its half and the grid
+       overflowed the modal (text and buttons got clipped off the right
+       edge). minmax(0, 1fr) keeps 2 columns but lets each track actually
+       shrink to fit, so text wraps instead of blowing out the layout.
+       Collections with only a couple of sub-items (e.g. The Backflip's
+       Trailer/Movie) already fit on one screen at a single column without
+       any scrolling, so those stay 1-up via .collection-grid--single
+       (set in Filmmakingpage.jsx based on item count) rather than
+       cramming just 2 tiles side by side for no reason. */
+    .collection-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .collection-grid--single {
+        grid-template-columns: 1fr;
+    }
+
+    .collection-tile {
+        padding: 10px;
+    }
+
+    /* Same word-length/ragged-height issue as the main grid's tiles at 2
+       columns - see the .video-info comment above. */
+    .collection-tile-info h4,
+    .collection-tile-info p {
+        hyphens: auto;
+        -webkit-hyphens: auto;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    .collection-tile-info h4 {
+        font-size: 0.85rem;
+    }
+
+    .collection-tile-info p {
+        font-size: 0.72rem;
+        margin: 0 0 10px 0;
+    }
+
+    .collection-tile-footer {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .collection-tile-footer .watch-btn {
+        padding: 7px 14px;
+        font-size: 0.68rem;
+    }
+
+    /* Used to be display:none on mobile entirely - shrunk and tucked into
+       the corner instead so it's still visible (it's a fixed overlay, so
+       it floats above the single-column grid rather than competing with
+       it for layout space) without eating too much screen on a phone. */
+    .poster-reminder {
+        width: 200px;
+        bottom: 20px;
+        right: 16px;
+    }
+
+    .poster-reminder-bubble {
+        /* Right padding needs to be wide enough to clear the close button
+           below (which is absolutely positioned, so it doesn't reserve its
+           own space) - 22px wasn't quite enough at this smaller bubble
+           width and the button's "x" ended up sitting on top of wrapped
+           text. */
+        padding: 14px 30px 16px 14px;
+        border-radius: 16px;
+    }
+
+    .poster-reminder-bubble p {
+        font-size: 0.8rem;
+        margin: 0 0 10px 0;
+    }
+
+    .poster-reminder-close {
+        top: 4px;
+        right: 6px;
+        font-size: 1.1rem;
+        padding: 3px 5px;
+    }
+
+    .poster-reminder-visit-btn {
+        padding: 6px 20px;
+        font-size: 0.75rem;
+    }
+
+    .poster-reminder-avatar {
+        width: 48px;
+        height: 48px;
+        bottom: -16px;
+    }
+
     /* ─── Art/Design Page ────────────────────── */
     .art-design-page {
         padding: 40px 16px 60px;
@@ -2148,28 +3297,73 @@ html, body {
     }
 
     /* ─── Project Pages ──────────────────────── */
+    .project-title-row {
+        margin-top: 20px;
+        padding: 0 16px;
+        gap: 10px;
+    }
+
+    .project-back-link {
+        font-size: 0.85rem;
+    }
+
     .project-page-title-bar {
         font-size: 1.1rem;
         padding: 14px 16px;
-        margin: 20px 16px 0;
+    }
+
+    .project-tile {
+        margin: 20px 16px 40px;
     }
 
     .project-page-body {
-        padding: 32px 20px 60px;
+        padding: 24px 20px 32px;
     }
 
     .project-page-description {
         font-size: 1rem;
     }
 
-    .image-slider ul li img {
-        height: 260px;
+    .image-slider-frame {
+        padding: 10px;
+        gap: 4px;
+    }
+
+    .image-slider-track ul li img {
+        max-height: 260px;
+    }
+
+    /* No arrows on mobile for any Art/Design project slider - swipe
+       left/right on the image instead (see the touchstart/touchend
+       handlers on .image-slider-track in ProjectSlider.jsx, and on
+       .posters-track-clip in PostersSlider.jsx for the posters page).
+       Covers both sliders since they share this class; the posters-scoped
+       override below is now redundant but left in place/documented rather
+       than removed, in case the two sliders' mobile treatment needs to
+       diverge again later. */
+    .image-slider-lr-toggle {
+        display: none;
     }
 
     /* ─── Posters Slider ─────────────────────── */
+    /* No arrows to leave room for on mobile (see below) - swipe left/right
+       on the poster instead, so it can take up most of the screen. */
     .posters-track li img {
-        height: 400px;
-        max-width: 220px;
+        height: min(68vh, 640px);
+        max-width: 100%;
+    }
+
+    .posters-track-wrapper {
+        padding: 24px 16px;
+    }
+
+    /* Swipe replaces the arrows on mobile - see the touchstart/touchend
+       handlers on .posters-track-clip in PostersSlider.jsx. Redundant with
+       the general .image-slider-lr-toggle rule above now that all project
+       sliders hide their arrows on mobile, kept here since it's more
+       specific and documents the posters-specific reasoning. */
+    .posters-track-wrapper .image-slider-lr-toggle {
+        display: none;
     }
 
     .poster-caption {
@@ -2178,11 +3372,57 @@ html, body {
         gap: 6px;
     }
 
+    /* ─── Posters Album (grid view) ──────────── */
+    .posters-grid-wrapper {
+        padding: 20px 24px;
+    }
+
+    .posters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 10px;
+    }
+
+    .poster-grid-item {
+        border-radius: 8px;
+    }
+
     /* ─── Hamburger dropdown ─────────────────── */
+    /* Back to a compact corner menu (like desktop) instead of a big
+       full-width block - now that whatever it sits over is actually
+       hidden while it's open (see body.menu-open below), the dropdown no
+       longer needs to stretch edge-to-edge just to avoid the
+       Personal/Collaborations toggle peeking out around its sides. */
     .hamburger-dropdown {
         right: 0;
         min-width: 220px;
     }
+
+    /* Hides the filmmaking page's Personal/Collaborations toggle while
+       the dropdown is open - it sits wider than the dropdown, so even
+       with correct stacking (see .site-header's z-index above), the
+       parts of it outside the dropdown's own box would still show
+       around its edges. Toggled by the header script. */
+    body.menu-open .tab-nav-wrapper {
+        visibility: hidden;
+    }
+
+    /* body.menu-open used to force-hide the home page's wave-divider too,
+       for the same reason as the toggle above - but the divider is real,
+       visible gradient art, not blank chrome, so hiding it just left a
+       hard flat cut where the curve should be. That case turned out to
+       be a genuine stacking bug rather than a coverage one: the dropdown's
+       z-index:9999 was competing directly against the divider's own
+       z-index:2 with nothing to separate them from the rest of the page.
+       Fixed at the source instead by dropping the divider itself to
+       z-index:0 while the menu is open (see body.menu-open .wave-divider
+       above, near .site-header) - it keeps painting over the header via
+       DOM order everywhere outside the dropdown, so the curve stays
+       visible right up to the dropdown's edges, while still losing to the
+       dropdown's explicit positive z-index where they actually overlap.
+       The toggle above stays hidden regardless, since even correct
+       stacking wouldn't stop it peeking out past the dropdown's edges -
+       that's a sizing issue (the toggle sits wider than the dropdown),
+       not a z-index one. */
 
     /* ─── Sub nav ────────────────────────────── */
     .sub-nav {
@@ -2209,12 +3449,18 @@ html, body {
     }
 
     .seg-control {
-        width: 240px;
+        max-width: 300px;
+    }
+
+    .seg-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.02em;
+        padding: 9px 2px;
     }
 
     .posters-track li img {
-        height: 340px;
-        max-width: 190px;
+        height: min(62vh, 480px);
+        max-width: 100%;
     }
 
     .project-page-title-bar {

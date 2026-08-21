@@ -11,16 +11,21 @@ const images = [
 ];
 ---
 
-<ArtDesignLayout backUrl="/art-design" pageTitle="LEGO ALIC">
+<ArtDesignLayout backUrl="/art-design" pageTitle="LEGO ALIC" hideHeaderBack>
   <div class="project-page">
-    <div class="project-page-title-bar">LEGO ALIC</div>
-    <ProjectSlider slides={images} client:load />
-    <div class="project-page-body">
-      <div class="project-meta">
-        <span class="project-type">Digital Art</span>
-        <span class="project-date">April 2023</span>
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">LEGO ALIC</div>
+    </div>
+    <div class="project-tile">
+      <ProjectSlider slides={images} client:idle />
+      <div class="project-page-body">
+        <div class="project-meta">
+          <span class="project-type">Digital Art</span>
+          <span class="project-date">April 2023</span>
+        </div>
+        <p class="project-page-description">Discover "Allegheny LEGO Infinite Construct," a portfolio centerpiece that brings together innovation and imagination. In this digital art installation, the technological hub of the ALIC is reimagined into a detailed LEGO recreation. Through the universal language of LEGOs, the project presents a playful reflection on creation and design, mirroring a loop where creation recreates itself. Employing photorealistic rendering, the installation breathes life into the lab's everyday elements through the whimsical form of LEGO.</p>
       </div>
-      <p class="project-page-description">Discover "Allegheny LEGO Infinite Construct," a portfolio centerpiece that brings together innovation and imagination. In this digital art installation, the technological hub of the ALIC is reimagined into a detailed LEGO recreation. Through the universal language of LEGOs, the project presents a playful reflection on creation and design, mirroring a loop where creation recreates itself. Employing photorealistic rendering, the installation breathes life into the lab's everyday elements through the whimsical form of LEGO.</p>
     </div>
   </div>
 </ArtDesignLayout>

@@ -1,0 +1,92 @@
+---
+const { pageTitle, backUrl = "/", hideHeaderBack = false } = Astro.props;
+import Footer from '../components/Footer.astro';
+---
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{pageTitle}</title>
+		<link rel="stylesheet" href="/css/style.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Chelsea+Market&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="header-inner">
+				<div class="header-left">
+					{!hideHeaderBack && <a href={backUrl} class="back-link">← Back</a>}
+				</div>
+				<div class="header-center">
+					<h1 class="site-title">Zane Devlin</h1>
+					<p class="site-subtitle">(Art / Design)</p>
+				</div>
+				<div class="header-right"></div>
+				<div class="header-menu">
+					<div class="hamburger-wrap">
+						<button class="hamburger" id="hamburger">&#9776;</button>
+						<div class="hamburger-dropdown" id="hamburgerDropdown">
+						<a href="/" class="dropdown-item">Home</a>
+						<div class="dropdown-section">
+							<button class="dropdown-heading" id="filmmakingToggle">
+								Filmmaking
+								<span class="dropdown-arrow">&#9662;</span>
+							</button>
+							<div class="dropdown-subitems" id="filmmakingSubitems">
+								<a href="/filmmaking?category=Personal" class="dropdown-subitem">Personal</a>
+								<a href="/filmmaking?category=Collaborations" class="dropdown-subitem">Collaborations</a>
+							</div>
+						</div>
+						<a href="/art-design" class="dropdown-item">Art / Design</a>
+					</div>
+				</div>
+			</div>
+		</header>
+		<main>
+			<h1>{pageTitle}</h1>
+			<slot />
+		</main>
+		<Footer />
+		<script>
+			const btn = document.getElementById('hamburger');
+			const menu = document.getElementById('hamburgerDropdown');
+			const mobileMq = window.matchMedia('(max-width: 768px)');
+
+			// Hides whatever the open dropdown sits over instead of
+			// relying on stacking order to paint over it - some browsers
+			// don't stack a fixed/high-z-index element correctly above
+			// descendants of Astro's `display: contents` hydration
+			// wrapper, which let content show through even at max
+			// z-index. See body.menu-open in style.css. No-op on
+			// desktop/tablet, where the dropdown doesn't reach far enough
+			// down for this to matter.
+			const syncMenuOpenClass = () => {
+				document.body.classList.toggle('menu-open', mobileMq.matches && menu.classList.contains('open'));
+			};
+
+			btn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				menu.classList.toggle('open');
+				syncMenuOpenClass();
+			});
+			document.addEventListener('click', () => {
+				menu.classList.remove('open');
+				syncMenuOpenClass();
+			});
+			mobileMq.addEventListener('change', syncMenuOpenClass);
+
+			const filmmakingToggle = document.getElementById('filmmakingToggle');
+			const filmmakingSubitems = document.getElementById('filmmakingSubitems');
+			if (filmmakingToggle && filmmakingSubitems) {
+				filmmakingToggle.addEventListener('click', (e) => {
+					e.stopPropagation();
+					filmmakingToggle.classList.toggle('open');
+					filmmakingSubitems.classList.toggle('open');
+				});
+			}
+		</script>
+	</body>
+</html>

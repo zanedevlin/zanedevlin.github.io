@@ -7,21 +7,24 @@ const images = [
   "/consuming-trooper-2.jpg",
   "/consuming-trooper-3.jpg",
   "/consuming-trooper-4.jpg",
-  "/consuming-trooper-5.jpg",
-  "/consuming-trooper-6.jpg",
 ];
 ---
 
-<ArtDesignLayout backUrl="/art-design" pageTitle="The Consuming Trooper">
+<ArtDesignLayout backUrl="/art-design" pageTitle="The Consuming Trooper" hideHeaderBack>
   <div class="project-page">
-    <div class="project-page-title-bar">The Consuming Trooper</div>
-    <ProjectSlider slides={images} client:load />
-    <div class="project-page-body">
-      <div class="project-meta">
-        <span class="project-type">Wearable Sculpture</span>
-        <span class="project-date">May 2023</span>
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">The Consuming Trooper</div>
+    </div>
+    <div class="project-tile">
+      <ProjectSlider slides={images} client:idle />
+      <div class="project-page-body">
+        <div class="project-meta">
+          <span class="project-type">Wearable Sculpture</span>
+          <span class="project-date">May 2023</span>
+        </div>
+        <p class="project-page-description">An exploration at the intersection of environmental consciousness and the stark realities of technological integration. This sculptural and wearable piece serves as both a beacon of sustainability and a commentary on the often overlooked consequences of our modern technology. Crafted with attention to renewable energy themes, 'The Consuming Trooper' represents the delicate balance between protecting our future and the potential self-consuming nature of progress.</p>
       </div>
-      <p class="project-page-description">An exploration at the intersection of environmental consciousness and the stark realities of technological integration. This sculptural and wearable piece serves as both a beacon of sustainability and a commentary on the often overlooked consequences of our modern technology. Crafted with attention to renewable energy themes, 'The Consuming Trooper' represents the delicate balance between protecting our future and the potential self-consuming nature of progress.</p>
     </div>
   </div>
 </ArtDesignLayout>

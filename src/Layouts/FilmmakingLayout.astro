@@ -31,24 +31,16 @@ import Footer from '../components/Footer.astro';
 						<div class="hamburger-dropdown" id="hamburgerDropdown">
 						<a href="/" class="dropdown-item">Home</a>
 						<div class="dropdown-section">
-							<button class="dropdown-heading" onclick="event.stopPropagation(); this.parentElement.classList.toggle('open')">
-								Filmmaking <span class="dropdown-arrow">▸</span>
+							<button class="dropdown-heading" id="filmmakingToggle">
+								Filmmaking
+								<span class="dropdown-arrow">&#9662;</span>
 							</button>
-							<div class="dropdown-subitems">
-								<a href="/filmmaking" class="dropdown-subitem">Personal</a>
-								<a href="/filmmaking" class="dropdown-subitem">Collaborations</a>
+							<div class="dropdown-subitems" id="filmmakingSubitems">
+								<a href="/filmmaking?category=Personal" class="dropdown-subitem">Personal</a>
+								<a href="/filmmaking?category=Collaborations" class="dropdown-subitem">Collaborations</a>
 							</div>
 						</div>
-						<div class="dropdown-section">
-							<button class="dropdown-heading" onclick="event.stopPropagation(); this.parentElement.classList.toggle('open')">
-								Art / Design <span class="dropdown-arrow">▸</span>
-							</button>
-							<div class="dropdown-subitems">
-								<a href="/art-design/consuming-trooper" class="dropdown-subitem">The Consuming Trooper</a>
-								<a href="/art-design/lego-alic" class="dropdown-subitem">LEGO ALIC</a>
-								<a href="/art-design/organic-technology" class="dropdown-subitem">Organic Technology</a>
-							</div>
-						</div>
+						<a href="/art-design" class="dropdown-item">Art / Design</a>
 					</div>
 				</div>
 			</div>
@@ -61,11 +53,40 @@ import Footer from '../components/Footer.astro';
 		<script>
 			const btn = document.getElementById('hamburger');
 			const menu = document.getElementById('hamburgerDropdown');
+			const mobileMq = window.matchMedia('(max-width: 768px)');
+
+			// Hides whatever the open dropdown sits over (the
+			// Personal/Collaborations toggle) instead of relying on
+			// stacking order to paint over it - some browsers don't stack
+			// a fixed/high-z-index element correctly above descendants of
+			// Astro's `display: contents` hydration wrapper, which let it
+			// show through even at max z-index. See body.menu-open in
+			// style.css. No-op on desktop/tablet, where the dropdown
+			// doesn't reach far enough down for this to matter.
+			const syncMenuOpenClass = () => {
+				document.body.classList.toggle('menu-open', mobileMq.matches && menu.classList.contains('open'));
+			};
+
 			btn.addEventListener('click', (e) => {
 				e.stopPropagation();
 				menu.classList.toggle('open');
+				syncMenuOpenClass();
 			});
-			document.addEventListener('click', () => menu.classList.remove('open'));
+			document.addEventListener('click', () => {
+				menu.classList.remove('open');
+				syncMenuOpenClass();
+			});
+			mobileMq.addEventListener('change', syncMenuOpenClass);
+
+			const filmmakingToggle = document.getElementById('filmmakingToggle');
+			const filmmakingSubitems = document.getElementById('filmmakingSubitems');
+			if (filmmakingToggle && filmmakingSubitems) {
+				filmmakingToggle.addEventListener('click', (e) => {
+					e.stopPropagation();
+					filmmakingToggle.classList.toggle('open');
+					filmmakingSubitems.classList.toggle('open');
+				});
+			}
 		</script>
 	</body>
 </html>

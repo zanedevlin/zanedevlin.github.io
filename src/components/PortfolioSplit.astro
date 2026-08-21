@@ -1,21 +1,316 @@
 ---
 ---
-<div class="portfolio-split">
+<div class="portfolio-split-wrap">
 
-    <a href="/filmmaking" class="split-panel split-filmmaking">
-        <div class="split-label">Film&shy;making</div>
-    </a>
+    <!-- Mobile-only instruction, in normal document flow above
+         .portfolio-split (not overlaid on it) - see .split-mobile-hint in
+         style.css. Because it's a real block sitting before
+         .portfolio-split rather than absolutely positioned over it, the
+         bolt divider (which is absolutely positioned *inside*
+         .portfolio-split, and can never render above that container's own
+         top edge) has no way to ever reach it, at any point in its
+         animated range. Hidden on desktop, where the hover-driven version
+         of this component doesn't need an instruction. -->
+    <p class="split-mobile-hint" aria-hidden="true">TAP A SIDE</p>
 
-    <a href="/art-design" class="split-panel split-art">
-        <div class="split-label">Art / Design</div>
-    </a>
+    <div class="portfolio-split">
 
-    <div class="bolt-divider">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
-            <polygon fill="#333"    points="-369.35 -1472.06 405.18 288.76 123.45 171.56 1580.96 2539.19 601.09 595.97 848.83 714.71 -369.35 -1472.06"/>
-            <polygon fill="#fff"    points="-369.35 -1472.06 503.95 370.11 222.23 252.9 1580.96 2539.19 699.86 677.32 947.6 796.06 -369.35 -1472.06"/>
-            <polygon fill="#ac342c" points="300.88 324.91 569.63 436.72 6.94 -750.23 860.18 719.25 625.5 606.76 1239.63 1904.52 300.88 324.91"/>
-        </svg>
+        <a href="/filmmaking" class="split-panel split-filmmaking">
+            <div class="split-label">Film&shy;making</div>
+        </a>
+
+        <a href="/art-design" class="split-panel split-art">
+            <div class="split-label">Art / Design</div>
+        </a>
+
+        <div class="bolt-divider">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+                <polygon fill="#333"    points="-369.35 -1472.06 405.18 288.76 123.45 171.56 1580.96 2539.19 601.09 595.97 848.83 714.71 -369.35 -1472.06"/>
+                <polygon fill="#fff"    points="-369.35 -1472.06 503.95 370.11 222.23 252.9 1580.96 2539.19 699.86 677.32 947.6 796.06 -369.35 -1472.06"/>
+                <polygon fill="#ac342c" points="300.88 324.91 569.63 436.72 6.94 -750.23 860.18 719.25 625.5 606.76 1239.63 1904.52 300.88 324.91"/>
+            </svg>
+        </div>
+
+        <!-- Mobile-only touch-tap teaching indicator - the touch-device
+             equivalent of .demo-cursor below (see the script). Structure
+             mirrors it on purpose: a center dot plus two expanding rings,
+             positioned/animated entirely from JS by toggling classes, same
+             as the cursor is. -->
+        <div class="touch-ripple" aria-hidden="true">
+            <span class="ripple-ring ripple-ring--1"></span>
+            <span class="ripple-ring ripple-ring--2"></span>
+            <span class="ripple-dot"></span>
+        </div>
+
     </div>
 
 </div>
+
+<script>
+    // First-visit hint: a little cursor glides over to each side in turn to
+    // show the panels are hoverable/clickable, then goes away. Reuses the
+    // real hover CSS via .demo-active-filmmaking/.demo-active-art classes
+    // (see style.css) so the demo animation is guaranteed to look exactly
+    // like a real hover - no separate animation to keep in sync.
+    (function () {
+        const split = document.querySelector('.portfolio-split');
+        if (!split) return;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // Pointer capability alone isn't enough to decide which demo to
+        // run: a real mouse on a desktop browser resized down to the
+        // mobile breakpoint - the single most common way anyone (a
+        // visitor OR a developer previewing "mobile") actually sees the
+        // mobile layout - is still hover-capable, so a check based only
+        // on (hover:hover) picked the desktop hand-cursor demo even
+        // though the mobile CSS (stacked panels, rotated bolt) was
+        // active. Requiring the viewport to also be at/above the mobile
+        // breakpoint keeps "canHover" meaning "actually showing the
+        // desktop layout", not just "has a mouse attached".
+        const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const isMobileWidth = window.matchMedia('(max-width: 768px)').matches;
+        const canHover = hoverCapable && !isMobileWidth;
+
+        // Shared by both the desktop cursor demo below and the mobile
+        // touch-ripple demo further down, so the two stay in lockstep with
+        // each other and with the CSS transition durations they trigger.
+        const INITIAL_DELAY_MS = 1300;
+        const HOLD_MS = 1150;       // how long each side's "selected" state is held
+        const MOVE_MS = 420;        // must match the demo indicator's left/top transition
+        const FADE_MS = 220;        // must match the demo indicator's opacity transition
+        const GAP_MS = 3000;        // idle pause before each loop after the first
+        const REPLAY_GAP_MS = 500;  // short pause before the immediate first replay
+        // Must comfortably clear the bolt/blur transition (0.5s, see
+        // .bolt-divider/.split-panel in style.css) - how long the
+        // tap-to-navigate handler below waits for the selected-state
+        // animation to finish before actually leaving the page.
+        const SELECTED_ANIM_MS = 560;
+
+        // ─── Mobile: tap-to-navigate, with the selected-state animation
+        // playing first (see requirement 6) - wired up regardless of
+        // whether the ripple demo below ends up running, since a visitor
+        // who taps before the demo would have shown itself still needs
+        // this. Left alone entirely on hover-capable devices, where a
+        // plain, instant link click is the existing (and correct)
+        // behavior.
+        if (!canHover) {
+            const panels = [
+                { link: split.querySelector('.split-filmmaking'), activeClass: 'demo-active-filmmaking' },
+                { link: split.querySelector('.split-art'), activeClass: 'demo-active-art' },
+            ];
+
+            panels.forEach(({ link, activeClass }) => {
+                if (!link) return;
+                link.addEventListener('click', (e) => {
+                    if (reduceMotion) return; // navigate immediately, no animation to wait on
+                    e.preventDefault();
+                    stopRippleDemo(); // defined below; no-op if the demo never started
+                    split.classList.remove('demo-active-filmmaking', 'demo-active-art');
+                    // Force a reflow so re-adding the class it may already
+                    // have (mid-demo) still restarts the transition from
+                    // wherever the bolt currently sits, rather than being a
+                    // no-op because the class "didn't change".
+                    void split.offsetWidth;
+                    split.classList.add(activeClass);
+                    setTimeout(() => { window.location.href = link.href; }, SELECTED_ANIM_MS);
+                });
+            });
+        }
+
+        // stopRippleDemo is referenced above (tap handler) but defined
+        // inside the touch-ripple branch below; declare a no-op up front
+        // so the tap handler works even when that branch never runs
+        // (reduced motion, or the ripple element is missing).
+        var stopRippleDemo = () => {};
+
+        if (reduceMotion) return;
+
+        if (!canHover) {
+            // ─── Mobile: touch-ripple teaching demo. Deliberately NOT the
+            // same shape as the cursor demo below anymore: the bolt only
+            // ever slides/blurs/reveals a label on a real tap (see the
+            // tap-to-navigate handler above, which is the only place that
+            // still touches demo-active-filmmaking/-art) - this idle-loop
+            // demo is just the ripple dot itself appearing and
+            // disappearing at each side to say "tap here", with no split
+            // animation riding along with it and no glide between sides
+            // (see .touch-ripple in style.css - opacity-only transition
+            // now). Reposition calls always happen while the ripple is
+            // already invisible, so the "jump" from side to side is never
+            // seen.
+            const ripple = document.querySelector('.touch-ripple');
+            if (!ripple) return;
+
+            let rippleStopped = false;
+            let rippleTimers = [];
+            let ripplePlayCount = 0;
+
+            const clearRippleTimers = () => {
+                rippleTimers.forEach(clearTimeout);
+                rippleTimers = [];
+            };
+
+            stopRippleDemo = () => {
+                if (rippleStopped) return;
+                rippleStopped = true;
+                clearRippleTimers();
+                ripple.classList.remove('touch-ripple--tap');
+                ripple.style.opacity = '0';
+            };
+
+            // Any real interaction cancels the demo for good, same as the
+            // desktop cursor demo does - it's done its job. The tap
+            // handler above also calls stopRippleDemo() directly so the
+            // demo can't keep looping during the navigation delay.
+            split.addEventListener('pointerdown', stopRippleDemo);
+            split.addEventListener('focusin', stopRippleDemo);
+
+            const rippleSchedule = (fn, delay) => {
+                const id = setTimeout(() => { if (!rippleStopped) fn(); }, delay);
+                rippleTimers.push(id);
+            };
+
+            const setRipplePos = (leftPct, topPct) => {
+                ripple.style.left = leftPct + '%';
+                ripple.style.top = topPct + '%';
+            };
+
+            const playTap = () => {
+                ripple.classList.remove('touch-ripple--tap');
+                void ripple.offsetWidth; // restart the CSS animations
+                ripple.classList.add('touch-ripple--tap');
+            };
+
+            // One side's worth of "appear, tap, disappear" - reused for
+            // both the filmmaking (left) and art (right) side each cycle.
+            const playSide = (leftPct, topPct, startDelay) => {
+                rippleSchedule(() => {
+                    setRipplePos(leftPct, topPct); // still invisible - no jump seen
+                }, startDelay);
+
+                rippleSchedule(() => {
+                    ripple.style.opacity = '1';
+                    playTap();
+                }, startDelay + 50);
+
+                rippleSchedule(() => {
+                    ripple.style.opacity = '0'; // just disappears - no slide/glide
+                }, startDelay + 50 + HOLD_MS);
+            };
+
+            const runRippleCycle = () => {
+                if (rippleStopped) return;
+                ripplePlayCount++;
+                const isFirstPlay = ripplePlayCount === 1;
+
+                const sideDuration = 50 + HOLD_MS + FADE_MS;
+                playSide(26, 50, 0);               // filmmaking side (left half)
+                playSide(74, 50, sideDuration);     // art side (right half)
+
+                rippleSchedule(() => {
+                    runRippleCycle();
+                }, sideDuration * 2 + (isFirstPlay ? REPLAY_GAP_MS : GAP_MS));
+            };
+
+            rippleSchedule(runRippleCycle, INITIAL_DELAY_MS);
+            return;
+        }
+
+        let stopped = false;
+        let timers = [];
+        let playCount = 0;
+
+        const cursor = document.createElement('div');
+        cursor.className = 'demo-cursor';
+        // Pixel-accurate reproduction of the classic hand-pointer cursor
+        // (traced cell-for-cell from a 17x22 reference bitmap), rendered as
+        // a mosaic of white fill rects with black outline rects layered on
+        // top - not a hand-drawn approximation.
+        cursor.innerHTML = `
+            <svg viewBox="-1 -1 19 24" aria-hidden="true"><g fill="#fff"><rect x="5" y="0" width="2.04" height="1.04"/><rect x="4" y="1" width="4.04" height="1.04"/><rect x="4" y="2" width="4.04" height="1.04"/><rect x="4" y="3" width="4.04" height="1.04"/><rect x="4" y="4" width="4.04" height="1.04"/><rect x="4" y="5" width="6.04" height="1.04"/><rect x="4" y="6" width="9.04" height="1.04"/><rect x="4" y="7" width="11.04" height="1.04"/><rect x="4" y="8" width="12.04" height="1.04"/><rect x="0" y="9" width="3.04" height="1.04"/><rect x="4" y="9" width="13.04" height="1.04"/><rect x="0" y="10" width="17.04" height="1.04"/><rect x="0" y="11" width="17.04" height="1.04"/><rect x="1" y="12" width="16.04" height="1.04"/><rect x="2" y="13" width="15.04" height="1.04"/><rect x="2" y="14" width="15.04" height="1.04"/><rect x="3" y="15" width="14.04" height="1.04"/><rect x="3" y="16" width="13.04" height="1.04"/><rect x="4" y="17" width="12.04" height="1.04"/><rect x="4" y="18" width="12.04" height="1.04"/><rect x="5" y="19" width="10.04" height="1.04"/><rect x="5" y="20" width="10.04" height="1.04"/><rect x="5" y="21" width="10.04" height="1.04"/></g><g fill="#1a1a1a"><rect x="5" y="0" width="2.04" height="1.04"/><rect x="4" y="1" width="1.04" height="1.04"/><rect x="7" y="1" width="1.04" height="1.04"/><rect x="4" y="2" width="1.04" height="1.04"/><rect x="7" y="2" width="1.04" height="1.04"/><rect x="4" y="3" width="1.04" height="1.04"/><rect x="7" y="3" width="1.04" height="1.04"/><rect x="4" y="4" width="1.04" height="1.04"/><rect x="7" y="4" width="1.04" height="1.04"/><rect x="4" y="5" width="1.04" height="1.04"/><rect x="7" y="5" width="3.04" height="1.04"/><rect x="4" y="6" width="1.04" height="1.04"/><rect x="7" y="6" width="1.04" height="1.04"/><rect x="10" y="6" width="3.04" height="1.04"/><rect x="4" y="7" width="1.04" height="1.04"/><rect x="7" y="7" width="1.04" height="1.04"/><rect x="10" y="7" width="1.04" height="1.04"/><rect x="13" y="7" width="2.04" height="1.04"/><rect x="4" y="8" width="1.04" height="1.04"/><rect x="7" y="8" width="1.04" height="1.04"/><rect x="10" y="8" width="1.04" height="1.04"/><rect x="13" y="8" width="1.04" height="1.04"/><rect x="15" y="8" width="1.04" height="1.04"/><rect x="0" y="9" width="3.04" height="1.04"/><rect x="4" y="9" width="1.04" height="1.04"/><rect x="7" y="9" width="1.04" height="1.04"/><rect x="10" y="9" width="1.04" height="1.04"/><rect x="13" y="9" width="1.04" height="1.04"/><rect x="16" y="9" width="1.04" height="1.04"/><rect x="0" y="10" width="1.04" height="1.04"/><rect x="3" y="10" width="2.04" height="1.04"/><rect x="13" y="10" width="1.04" height="1.04"/><rect x="16" y="10" width="1.04" height="1.04"/><rect x="0" y="11" width="1.04" height="1.04"/><rect x="4" y="11" width="1.04" height="1.04"/><rect x="16" y="11" width="1.04" height="1.04"/><rect x="1" y="12" width="1.04" height="1.04"/><rect x="4" y="12" width="1.04" height="1.04"/><rect x="16" y="12" width="1.04" height="1.04"/><rect x="2" y="13" width="1.04" height="1.04"/><rect x="4" y="13" width="1.04" height="1.04"/><rect x="16" y="13" width="1.04" height="1.04"/><rect x="2" y="14" width="1.04" height="1.04"/><rect x="16" y="14" width="1.04" height="1.04"/><rect x="3" y="15" width="1.04" height="1.04"/><rect x="16" y="15" width="1.04" height="1.04"/><rect x="3" y="16" width="1.04" height="1.04"/><rect x="15" y="16" width="1.04" height="1.04"/><rect x="4" y="17" width="1.04" height="1.04"/><rect x="15" y="17" width="1.04" height="1.04"/><rect x="4" y="18" width="1.04" height="1.04"/><rect x="15" y="18" width="1.04" height="1.04"/><rect x="5" y="19" width="1.04" height="1.04"/><rect x="14" y="19" width="1.04" height="1.04"/><rect x="5" y="20" width="1.04" height="1.04"/><rect x="14" y="20" width="1.04" height="1.04"/><rect x="5" y="21" width="10.04" height="1.04"/></g></svg>
+        `;
+        cursor.setAttribute('aria-hidden', 'true');
+        split.appendChild(cursor);
+
+        const clearTimers = () => {
+            timers.forEach(clearTimeout);
+            timers = [];
+        };
+
+        const stopDemo = () => {
+            if (stopped) return;
+            stopped = true;
+            clearTimers();
+            split.classList.remove('demo-active-filmmaking', 'demo-active-art');
+            cursor.classList.remove('demo-cursor--active');
+            cursor.style.opacity = '0';
+            setTimeout(() => cursor.remove(), FADE_MS + 50);
+        };
+
+        // Any real interaction cancels the demo for good - it's done its job.
+        split.addEventListener('pointerenter', stopDemo);
+        split.addEventListener('pointerdown', stopDemo);
+        split.addEventListener('focusin', stopDemo);
+
+        const schedule = (fn, delay) => {
+            const id = setTimeout(() => { if (!stopped) fn(); }, delay);
+            timers.push(id);
+        };
+
+        const setCursorPos = (leftPct, topPct) => {
+            cursor.style.left = leftPct + '%';
+            cursor.style.top = topPct + '%';
+        };
+
+        // Loops indefinitely - the only thing that ever stops it is a real
+        // interaction (see stopDemo above). If the visitor never touches
+        // it, it keeps quietly demonstrating the hover every few seconds
+        // rather than giving up after a handful of tries.
+        const runCycle = () => {
+            if (stopped) return;
+            playCount++;
+            const isFirstPlay = playCount === 1;
+
+            setCursorPos(26, 58); // filmmaking side, still invisible
+            cursor.style.opacity = '0';
+
+            schedule(() => {
+                cursor.style.opacity = '1';
+                split.classList.add('demo-active-filmmaking');
+                cursor.classList.add('demo-cursor--active');
+            }, 50);
+
+            // Swap sides in one tick - removing the filmmaking hover state
+            // and adding the art one together (rather than in two separate
+            // steps) means the bolt divider's CSS transition runs straight
+            // from one side to the other in a single continuous glide,
+            // instead of snapping back toward center first.
+            schedule(() => {
+                cursor.classList.remove('demo-cursor--active');
+                split.classList.remove('demo-active-filmmaking');
+                split.classList.add('demo-active-art');
+                setCursorPos(74, 58); // glide over to the art side
+            }, 50 + HOLD_MS);
+
+            schedule(() => {
+                cursor.classList.add('demo-cursor--active');
+            }, 50 + HOLD_MS + MOVE_MS);
+
+            schedule(() => {
+                split.classList.remove('demo-active-art');
+                cursor.classList.remove('demo-cursor--active');
+                cursor.style.opacity = '0';
+            }, 50 + HOLD_MS + MOVE_MS + HOLD_MS);
+
+            // The very first play is immediately followed by one extra replay
+            // (a short pause rather than the full idle gap) in case a visitor
+            // glances away during the first pass - after that the demo settles
+            // into a single cycle every GAP_MS, same as before.
+            schedule(() => {
+                runCycle();
+            }, 50 + HOLD_MS + MOVE_MS + HOLD_MS + FADE_MS + (isFirstPlay ? REPLAY_GAP_MS : GAP_MS));
+        };
+
+        schedule(runCycle, INITIAL_DELAY_MS);
+    })();
+</script>

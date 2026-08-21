@@ -11,16 +11,21 @@ const images = [
 ];
 ---
 
-<ArtDesignLayout backUrl="/art-design" pageTitle="Organic Technology">
+<ArtDesignLayout backUrl="/art-design" pageTitle="Organic Technology" hideHeaderBack>
   <div class="project-page">
-    <div class="project-page-title-bar">Organic Technology</div>
-    <ProjectSlider slides={images} client:load />
-    <div class="project-page-body">
-      <div class="project-meta">
-        <span class="project-type">Sculpture</span>
-        <span class="project-date">March 2023</span>
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">Organic Technology</div>
+    </div>
+    <div class="project-tile">
+      <ProjectSlider slides={images} client:idle />
+      <div class="project-page-body">
+        <div class="project-meta">
+          <span class="project-type">Sculpture</span>
+          <span class="project-date">March 2023</span>
+        </div>
+        <p class="project-page-description">An immersive sculpture that presents a wire hand reaching from a smartphone, symbolizing the encroaching vitality of technology. The intertwined electrical and copper wires suggest a living nervous system, while on-screen visuals depict captivity, blurring lines between art and reality. This installation invites reflection on technology's potential to evolve towards consciousness, prompting discussions about our intertwined digital future.</p>
       </div>
-      <p class="project-page-description">An immersive sculpture that presents a wire hand reaching from a smartphone, symbolizing the encroaching vitality of technology. The intertwined electrical and copper wires suggest a living nervous system, while on-screen visuals depict captivity, blurring lines between art and reality. This installation invites reflection on technology's potential to evolve towards consciousness, prompting discussions about our intertwined digital future.</p>
     </div>
   </div>
 </ArtDesignLayout>
