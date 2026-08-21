@@ -1833,25 +1833,19 @@ main > h1:first-child {
 }
 
 .image-slider-track ul li img {
-    /* width/height both auto, capped by max-width/max-height instead of a
-       fixed height + object-fit:contain - the image sizes itself to its
-       own aspect ratio and is only ever scaled down (never stretched or
-       cropped), so its rendered box always matches its visible content
-       exactly, with no leftover gap on any side. That matters because
-       border-radius only rounds this element's own box: the old fixed-
-       height version could leave a transparent gap between the visible
-       photo and the box's real edge whenever a project's images weren't
-       the same shape as that box (e.g. Lego Alic/Organic Technology, both
-       wider than the 480px-tall frame) - and that gap, not the photo, was
-       what the border-radius was rounding, so it never showed. Capping
-       both axes (rather than filling width:100% outright) keeps a very
-       wide or very square project from rendering oversized - see the
-       mobile override below for the smaller cap there. */
+    /* width:100% + height:auto - the image always scales up or down to
+       fill the frame's full width, at its own aspect ratio, so it never
+       sits centered with red showing on either side (a max-height cap
+       tried here previously left square/portrait projects like Consuming
+       Trooper stranded well short of the frame's width). This also keeps
+       border-radius rounding the photo's real edge with no gap to leave
+       it invisible: the image's rendered box always matches its visible
+       content exactly, whatever its aspect ratio - see the mobile
+       override below for how tall this is allowed to get on a phone
+       screen. */
     display: block;
-    width: auto;
+    width: 100%;
     height: auto;
-    max-width: 100%;
-    max-height: 480px;
     border-radius: 8px;
 }
 
@@ -3327,10 +3321,6 @@ html, body {
     .image-slider-frame {
         padding: 10px;
         gap: 4px;
-    }
-
-    .image-slider-track ul li img {
-        max-height: 260px;
     }
 
     /* No arrows on mobile for any Art/Design project slider - swipe

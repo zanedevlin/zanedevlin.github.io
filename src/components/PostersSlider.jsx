@@ -22,7 +22,7 @@ const slides = [
   { src: "/poster-da-bomb-2.jpg", from: "Da Bomb", link: "/filmmaking" },
   { src: "/poster-game-over.jpg", from: "GAME OVER", link: "/filmmaking" },
   { src: "/poster-vukovich-night-guard.jpg", from: "Vukovich Night Guard", link: "/filmmaking" },
-  { src: "/poster-the-space.jpg", from: "The Space", link: "/filmmaking" },
+  { src: "/poster-the-space.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
 ];
 
 // Gap left between the poster's actual edge and the arrow/close buttons in

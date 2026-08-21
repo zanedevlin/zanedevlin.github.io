@@ -393,6 +393,68 @@ const ClampedText = ({ text, className, lines }) => {
   );
 };
 
+// Instagram's base64-ish shortcode (the part of /p/<code>/ and /reel/<code>/
+// URLs) is just its numeric media id encoded with this alphabet - decoding
+// it back is what lets a tap open the native app directly via its
+// undocumented instagram://media?id=<id> deep link, instead of window.open
+// always landing in Safari on instagram.com first. That matters because
+// Instagram's own "Open in app" banner there doesn't reliably detect the
+// app - on a device where it's installed but out of date, tapping the
+// banner can send the visitor to the App Store instead of just opening the
+// post, on top of the pointless Safari detour every time either way.
+const INSTAGRAM_SHORTCODE_ALPHABET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+const shortcodeToMediaId = (shortcode) => {
+  try {
+    let id = 0n;
+    for (const char of shortcode) {
+      const value = INSTAGRAM_SHORTCODE_ALPHABET.indexOf(char);
+      if (value === -1) return null;
+      id = id * 64n + BigInt(value);
+    }
+    return id.toString();
+  } catch {
+    return null;
+  }
+};
+
+// Opens an Instagram post/reel URL, trying the native app first and only
+// falling back to the normal web URL (in a new tab, same as before) if the
+// app doesn't actually take over the tab within a beat. Detecting "did the
+// app open" is done via the page's visibility - if instagram:// successfully
+// handed off to the app, this tab gets backgrounded almost immediately; if
+// nothing happened (app not installed, scheme blocked, etc.) the tab stays
+// visible and the fallback timer fires instead.
+const openInstagramLink = (webUrl) => {
+  const match = webUrl.match(/instagram\.com\/(?:p|reel)\/([^/?]+)/);
+  const mediaId = match ? shortcodeToMediaId(match[1]) : null;
+
+  if (!mediaId) {
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  let settled = false;
+  const openFallback = () => {
+    if (settled || document.hidden) return;
+    settled = true;
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const timer = setTimeout(openFallback, 1500);
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      settled = true;
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
+
+  window.location.href = `instagram://media?id=${mediaId}`;
+};
+
 // Reads ?category=Personal / ?category=Collaborations off the URL so the
 // hamburger dropdown's two Filmmaking sub-links actually land on the right
 // tab instead of both just opening the page on whatever the default is.
@@ -450,6 +512,19 @@ const FilmmakingPage = () => {
       observer.disconnect();
     };
   }, [reminderDismissed]);
+
+  // Auto-opens a specific collection tile's breakout when linked to via
+  // ?open=<exact tile title> - e.g. the Posters page links "The Space"
+  // poster straight to that film's breakout instead of just dropping the
+  // visitor on the general Personal video grid. Runs once on mount; only
+  // matches tiles that actually have a collection to open.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const title = params.get("open");
+    if (!title) return;
+    const match = videos.find(v => v.title === title && v.collection);
+    if (match) setActiveCollection(match);
+  }, []);
 
   const HandleToggleChange = () => {
     setIsCollaborations(isCollaborations => {
@@ -522,7 +597,12 @@ const FilmmakingPage = () => {
     }
     if (EXTERNAL_ONLY_PLATFORMS.includes(video.platform)) {
       const url = getExternalUrl(video);
-      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      if (!url) return;
+      if (video.platform === 'instagram') {
+        openInstagramLink(url);
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
       return;
     }
     setActiveVideo(video);
@@ -674,7 +754,18 @@ const FilmmakingPage = () => {
                 <div
                   key={i}
                   className="collection-tile"
-                  onClick={() => window.open(sub.url || `https://www.instagram.com/reel/${sub.videoId}/`, '_blank', 'noopener,noreferrer')}
+                  onClick={() => {
+                    const url = sub.url || `https://www.instagram.com/reel/${sub.videoId}/`;
+                    // Sub-items default to Instagram (see the collection
+                    // comments above) - OneDrive is the one platform here
+                    // that explicitly opts out, since its share link isn't
+                    // an Instagram URL and has no app to deep-link into.
+                    if (sub.platform === 'onedrive') {
+                      window.open(url, '_blank', 'noopener,noreferrer');
+                    } else {
+                      openInstagramLink(url);
+                    }
+                  }}
                 >
                   <div
                     className="collection-tile-thumbnail"
