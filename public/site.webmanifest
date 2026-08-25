@@ -1,0 +1,21 @@
+{
+    "name": "Zane Devlin",
+    "short_name": "Zane Devlin",
+    "description": "Filmmaker, designer, and artist — portfolio of Zane Devlin.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#2B2B2C",
+    "theme_color": "#BB2523",
+    "icons": [
+        {
+            "src": "/favicon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/favicon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

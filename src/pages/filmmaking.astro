@@ -2,8 +2,9 @@
 import FilmmakingLayout from '../Layouts/FilmmakingLayout.astro';
 import FilmmakingPage from '../components/Filmmakingpage.jsx';
 const pageTitle = "Film-making";
+const pageDescription = "Filmmaking portfolio of Zane Devlin — personal films and collaborations, from trailers to short documentaries.";
 ---
 
-<FilmmakingLayout pageTitle={pageTitle}>
+<FilmmakingLayout pageTitle={pageTitle} pageDescription={pageDescription}>
   <FilmmakingPage client:idle />
 </FilmmakingLayout>

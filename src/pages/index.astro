@@ -1,10 +1,24 @@
 ---
 const pageTitle = "Zane Devlin";
+const pageDescription = "Zane Devlin is a filmmaker, designer, and artist based in Brooklyn, New York. Explore his film work, art, and design projects.";
 import BaseLayout from "../Layouts/BaseLayout.astro";
 import PortfolioSplit from "../components/PortfolioSplit.astro";
 import AboutSection from "../components/AboutSection.astro";
+
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Zane Devlin",
+    "url": "https://zaneydevlin.com",
+    "image": "https://zaneydevlin.com/og-image.jpg",
+    "jobTitle": ["Filmmaker", "Designer", "Artist"],
+    "description": pageDescription,
+    "sameAs": [
+        "https://www.linkedin.com/in/zane-devlin/"
+    ]
+};
 ---
-<BaseLayout pageTitle={pageTitle}>
+<BaseLayout pageTitle={pageTitle} pageDescription={pageDescription} jsonLd={jsonLd}>
     <div class="home-sections">
         <PortfolioSplit />
         <AboutSection />
