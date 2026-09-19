@@ -1,0 +1,64 @@
+---
+import ArtDesignLayout from '../../../Layouts/ArtDesignLayout.astro';
+import ProjectSlider from '../../../components/ProjectSlider.jsx';
+
+/* Captions carry the process piece by piece, because almost nothing here
+   is a single technique. What is true of the whole series belongs in the
+   description below rather than attached to whichever print it happened
+   to be written next to.
+
+   The nine versions of the hand and figure share one method, so only the
+   first of them is labelled with it; repeating the same label under each
+   would say nothing new. Where two prints were made the same way they
+   carry the same label, which is what a wall label would do. */
+const images = [
+  { src: "/italy-print-studio.jpg", caption: "The drying rack in the studio in Rome. The sheet at the front is a sketch of the superhero character developed for my senior comprehensive project or capstone at Allegheny College, etched into a plate with graphite and finished in watercolor." },
+
+  { src: "/italy-print-06.jpg", caption: "One image, printed in many versions. Each combines three processes on a single sheet: the figure and the halftone screen printed, the hand a laser cut paper stencil, and the background a mono relief." },
+  "/italy-print-07.jpg",
+  { src: "/italy-print-08.jpg", caption: "The version selected as the poster for Make Keeley JUMP., a short film made at Allegheny. This print was exhibited on campus and later framed and given to Mike Keeley." },
+  "/italy-print-09.jpg",
+  "/italy-print-01.jpg",
+  "/italy-print-02.jpg",
+  "/italy-print-03.jpg",
+  "/italy-print-04.jpg",
+  "/italy-print-05.jpg",
+
+  { src: "/italy-print-10.jpg", caption: "A laser cut plastic stencil, printed as a mono relief." },
+  { src: "/italy-print-11.jpg", caption: "Screen printed. This is the pattern that was later printed onto fabric, and eventually onto the balaclavas of my senior comprehensive project or capstone at Allegheny College." },
+  { src: "/italy-print-12.jpg", caption: "The same pattern, printed in the same sitting, run experimentally on black paper." },
+  { src: "/italy-print-13.jpg", caption: "Painted onto a clear plate and printed as a mono relief." },
+  { src: "/italy-print-14.jpg", caption: "Painted onto a clear plate and printed as a mono relief." },
+  { src: "/italy-print-16.jpg", caption: "Painted onto a clear plate and printed as a mono relief." },
+  { src: "/italy-print-15.jpg", caption: "Etched into a plastic plate and rubbed with graphite." },
+];
+---
+
+<ArtDesignLayout
+  backUrl="/art-design/italy"
+  pageTitle="Printmaking, Italy"
+  pageDescription="Screen, stencil and mono relief prints made by Zane Devlin during a semester in Rome, worked toward a poster for the short film Make Keeley JUMP."
+  hideHeaderBack
+>
+  <div class="project-page">
+    <div class="project-title-row">
+      <a href="/art-design/italy" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">Printmaking</div>
+    </div>
+    <ProjectSlider slides={images} album client:load />
+    <div class="project-page-body">
+      <div class="project-meta">
+        <span class="project-type">Printmaking</span>
+        <span class="project-date">Fall 2024</span>
+      </div>
+
+      <p class="project-page-description">A semester in Rome spent largely on one image, printed in many versions. Each version combines three processes on a single sheet: the figure and the halftone are screen printed, the hand is a laser cut paper stencil, and the background is a mono relief, approached differently almost every time. Some of those backgrounds are textures lifted from an old sock. Others were screen printed in whatever ink color had been mixed that day.</p>
+
+      <p class="project-page-description">The prints collected here are the ones that were photographed or scanned. The run was considerably larger.</p>
+
+      <p class="project-page-description">The work was directed toward a poster for <a class="project-link" href="/art-design/posters?open=Make%20Keeley%20JUMP.">Make Keeley JUMP.</a>, a short film made at Allegheny. One version was selected for it, exhibited on campus, and later framed and given to Mike Keeley.</p>
+
+      <p class="project-page-description">The last few prints belong to a separate thread. The repeating pattern was screen printed here first, then printed onto cloth as <a class="project-link" href="/art-design/italy/textiles">Textiles</a>, and a year later onto the balaclavas of <a class="project-link" href="/art-design/the-eclipse">The Eclipse</a>, my senior comprehensive project or capstone at Allegheny College.</p>
+    </div>
+  </div>
+</ArtDesignLayout>

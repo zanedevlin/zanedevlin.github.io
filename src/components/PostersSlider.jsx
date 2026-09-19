@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import CloserLook, { CloserLookButton } from "./CloserLook.jsx";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TO ADD A POSTER:
@@ -32,7 +33,19 @@ const CAROUSEL_CONTROL_GAP = 20;
 
 const PostersSlider = () => {
   const [viewMode, setViewMode] = useState("grid"); // "grid" | "carousel"
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // true when the closer-look viewer is showing the current poster
+  const [closerLook, setCloserLook] = useState(false);
+  // Infinite carousel: the track carries a clone of the last poster in
+  // front and a clone of the first behind, so stepping off either end
+  // animates one poster forward and is then swapped for the real one with
+  // the transition switched off - never a rewind through the whole strip.
+  // Same treatment as ProjectSlider.jsx.
+  const count = slides.length;
+  const loop = count > 1;
+  const extended = loop ? [slides[count - 1], ...slides, slides[0]] : slides;
+  const [pos, setPos] = useState(loop ? 1 : 0);
+  const [animate, setAnimate] = useState(true);
+  const currentIndex = loop ? (((pos - 1) % count) + count) % count : 0;
   const [gutter, setGutter] = useState(40);
   const gridWrapperRef = useRef(null);
 
@@ -111,8 +124,30 @@ const PostersSlider = () => {
     return () => window.removeEventListener("resize", computeGutter);
   }, [viewMode]);
 
+  // ?open=<the poster's "from" value> opens that poster straight into the
+  // carousel, so another page can point at one specific poster rather than
+  // at the grid. Matched case-insensitively against `from` because the
+  // link is written by hand on the other page and a trailing full stop or
+  // a capital is an easy thing to get slightly wrong.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const want = new URLSearchParams(window.location.search).get("open");
+    if (!want) return;
+    const norm = (v) => (v || "").trim().toLowerCase().replace(/\.$/, "");
+    const index = slides.findIndex((s) => norm(s.from) === norm(want));
+    if (index === -1) return;
+    setAnimate(false);
+    setPos(loop ? index + 1 : 0);
+    setViewMode("carousel");
+    // Drop the parameter so a refresh or a shared URL is not stuck on it.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("open");
+    window.history.replaceState({}, "", url);
+  }, []);
+
   const openCarousel = (index) => {
-    setCurrentIndex(index);
+    setAnimate(false);
+    setPos(loop ? index + 1 : 0);
     setViewMode("carousel");
   };
 
@@ -123,12 +158,43 @@ const PostersSlider = () => {
   // plain DOM addEventListener (not React's synthetic props), so they
   // can't rely on re-render to pick up a fresh currentIndex each time.
   const slideImages = (dir) => {
-    setCurrentIndex((prev) => {
-      if (dir === "left" && prev > 0) return prev - 1;
-      if (dir === "right" && prev < slides.length - 1) return prev + 1;
-      return prev;
-    });
+    if (!loop) return;
+    setAnimate(true);
+    setPos((prev) => (dir === "left" ? prev - 1 : prev + 1));
   };
+
+  const goTo = (index) => {
+    setAnimate(true);
+    setPos(loop ? index + 1 : 0);
+  };
+
+  // Swap off a clone and back onto the real poster once the animation
+  // onto the clone has finished.
+  const handleTransitionEnd = (e) => {
+    if (e.propertyName !== "transform" || !loop) return;
+    if (pos === count + 1) {
+      setAnimate(false);
+      setPos(1);
+    } else if (pos === 0) {
+      setAnimate(false);
+      setPos(count);
+    }
+  };
+
+  // Re-arm the transition only after the browser has painted the
+  // un-animated jump, otherwise React batches the two together and the
+  // snap shows up as a rewind.
+  useEffect(() => {
+    if (animate) return;
+    let inner;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setAnimate(true));
+    });
+    return () => {
+      cancelAnimationFrame(outer);
+      if (inner) cancelAnimationFrame(inner);
+    };
+  }, [animate]);
 
   // Swipe left/right on the poster to move between slides - this is the
   // only way to navigate on mobile, since the arrows are hidden there in
@@ -208,6 +274,22 @@ const PostersSlider = () => {
     };
   }, [viewMode, slides.length]);
 
+  // Left/right arrows walk the carousel. The viewer, when open, handles
+  // them itself and stops the event, so these never both fire.
+  useEffect(() => {
+    if (viewMode !== "carousel") return;
+    const onKeyDown = (e) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const el = e.target;
+      const tag = el && el.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (el && el.isContentEditable)) return;
+      e.preventDefault();
+      slideImages(e.key === "ArrowLeft" ? "left" : "right");
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [viewMode, loop, count]);
+
   // Let Escape back out of the carousel, same as clicking the close button.
   useEffect(() => {
     if (viewMode !== "carousel") return;
@@ -248,6 +330,32 @@ const PostersSlider = () => {
     <div className="posters-slider">
       <button
         type="button"
+        className="closer-look-btn closer-look-btn--poster"
+        style={{ left: `calc(50% - ${halfImgWidth - 12}px)` }}
+        aria-label="Take a closer look"
+        title="Closer look"
+        onClick={() => setCloserLook(true)}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
+             strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <line x1="15.5" y1="15.5" x2="20.5" y2="20.5" />
+          <line x1="10.5" y1="7.5" x2="10.5" y2="13.5" />
+          <line x1="7.5" y1="10.5" x2="13.5" y2="10.5" />
+        </svg>
+      </button>
+
+      {closerLook && (
+        <CloserLook
+          src={current.src}
+          alt={`Poster from ${current.from}`}
+          onNavigate={loop ? (dir) => slideImages(dir < 0 ? "left" : "right") : undefined}
+          onClose={() => setCloserLook(false)}
+        />
+      )}
+
+      <button
+        type="button"
         className="posters-close-btn"
         style={{ left: `calc(50% + ${halfImgWidth - 18}px)` }}
         onClick={closeCarousel}
@@ -265,21 +373,35 @@ const PostersSlider = () => {
           className="posters-track-clip"
           ref={trackClipRef}
         >
-          <ul className="posters-track" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-            {slides.map((slide, index) => (
-              <li key={index}>
-                <img
-                  src={slide.src}
-                  alt={`Poster ${index + 1}`}
-                  ref={index === currentIndex ? currentImgRef : undefined}
-                  loading={index === currentIndex ? "eager" : "lazy"}
-                  decoding="async"
-                  onLoad={index === currentIndex
-                    ? (e) => setHalfImgWidth(e.currentTarget.getBoundingClientRect().width / 2)
-                    : undefined}
-                />
-              </li>
-            ))}
+          <ul
+            className="posters-track"
+            style={{
+              transform: `translateX(-${pos * 100}%)`,
+              transition: animate ? undefined : "none",
+            }}
+            onTransitionEnd={handleTransitionEnd}
+          >
+            {extended.map((slide, k) => {
+              // Map a position in the padded track back onto the real
+              // poster it stands for; measurement follows the position
+              // on screen, not the real index, so clones measure too.
+              const index = loop ? (((k - 1) % count) + count) % count : k;
+              return (
+                <li key={k}>
+                  <img
+                    src={slide.src}
+                    alt={`Poster ${index + 1}`}
+                    ref={k === pos ? currentImgRef : undefined}
+                    onClick={() => { if (k === pos) setCloserLook(true); }}
+                    loading={k === pos ? "eager" : "lazy"}
+                    decoding="async"
+                    onLoad={k === pos
+                      ? (e) => setHalfImgWidth(e.currentTarget.getBoundingClientRect().width / 2)
+                      : undefined}
+                  />
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -298,7 +420,7 @@ const PostersSlider = () => {
               type="button"
               className={`slide-dot ${index === currentIndex ? "active" : ""}`}
               aria-label={`Go to poster ${index + 1}`}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => goTo(index)}
             />
           ))}
         </div>

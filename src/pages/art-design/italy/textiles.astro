@@ -1,0 +1,49 @@
+---
+import ArtDesignLayout from '../../../Layouts/ArtDesignLayout.astro';
+import ProjectSlider from '../../../components/ProjectSlider.jsx';
+
+/* The six two-sided pieces come first: each is one length of fabric
+   printed on both faces, so it is passed to the slider as a { front,
+   back } pair and turns over in place instead of taking up two slides. */
+const images = [
+  { front: "/italy-textile-1-front.jpg", back: "/italy-textile-1-back.jpg" },
+  { front: "/italy-textile-2-front.jpg", back: "/italy-textile-2-back.jpg" },
+  { front: "/italy-textile-3-front.jpg", back: "/italy-textile-3-back.jpg" },
+  { front: "/italy-textile-4-front.jpg", back: "/italy-textile-4-back.jpg" },
+  { front: "/italy-textile-5-front.jpg", back: "/italy-textile-5-back.jpg" },
+  { front: "/italy-textile-6-front.jpg", back: "/italy-textile-6-back.jpg" },
+  "/italy-textile-8.jpg",
+  "/italy-textile-7.jpg",
+  "/italy-shirt-1.jpg",
+  "/italy-shirt-2.jpg",
+  // Closing sequence on one cloth: the printed panels flat, the repeat up
+  // close, then the garment it was cut and pinned into.
+  "/italy-textile-panels.jpg",
+  "/italy-textile-detail.jpg",
+  "/italy-garment.jpg",
+];
+---
+
+<ArtDesignLayout
+  backUrl="/art-design/italy"
+  pageTitle="Textiles, Italy"
+  pageDescription="Screen printed textiles made by Zane Devlin during a semester in Rome, in the pattern that later ran through his senior comprehensive project or capstone at Allegheny College."
+  hideHeaderBack
+>
+  <div class="project-page">
+    <div class="project-title-row">
+      <a href="/art-design/italy" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">Textiles</div>
+    </div>
+    <ProjectSlider slides={images} album client:load />
+    <div class="project-page-body">
+      <div class="project-meta">
+        <span class="project-type">Textiles</span>
+        <span class="project-date">Fall 2024</span>
+      </div>
+      <p class="project-page-description">The pattern was worked out as a screen print on paper, among the <a class="project-link" href="/art-design/italy/printmaking">Printmaking</a> of the same semester, before it reached cloth and was printed at scale across each length of fabric. A year later the same pattern was printed on the balaclavas of <a class="project-link" href="/art-design/the-eclipse">The Eclipse</a>, my senior comprehensive project or capstone at Allegheny College.</p>
+
+      <p class="project-page-description">The first six pieces are photographed on both faces: use <strong>Front / Back</strong> to turn a piece over, and the arrows or dots to move between pieces. The last three follow a single cloth through, from the printed panels laid flat, to the repeat up close, to the garment it was cut and pinned into.</p>
+    </div>
+  </div>
+</ArtDesignLayout>

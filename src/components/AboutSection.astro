@@ -1,4 +1,5 @@
 ---
+import SoftwareSection from './SoftwareSection.astro';
 ---
 
 <div class="wave-divider wave-divider--top">
@@ -35,10 +36,8 @@
     </div>
 </section>
 
-<div class="wave-divider wave-divider--bottom">
-    <svg viewBox="0 0 1440 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <path d="M0,110 C160,15 1280,15 1440,110 L1440,200 L0,200 Z" fill="rgba(187,37,35,0.2)"/>
-        <path d="M0,140 C140,25 1300,25 1440,140 L1440,200 L0,200 Z" fill="rgba(187,37,35,0.6)"/>
-        <path d="M0,170 C120,40 1320,40 1440,170 L1440,200 L0,200 Z" fill="#BB2523"/>
-    </svg>
-</div>
+<!-- The toolkit follows About Me, and the wave that used to close this
+     component moved inside it. The shelf of icons now sits across that
+     wave rather than above it, so the two have to be laid out together;
+     see .toolkit-shelf in the stylesheet. -->
+<SoftwareSection />

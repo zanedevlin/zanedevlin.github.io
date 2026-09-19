@@ -194,6 +194,386 @@ main > h1:first-child {
     color: #ddd;
 }
 
+/* ─── The Toolkit ────────────────────────────── */
+/* The programs, drawn as the app icons they actually are. The icons are
+   the real ones out of each installed bundle (see SoftwareSection.astro),
+   so the only thing this stylesheet draws is the shelf they sit on.
+
+   One slab, not thirteen tiles. A Dock is a single piece of glass with
+   icons resting on it; putting each icon in its own glass square turns
+   every one into a button, which is wrong here because none of them do
+   anything when clicked. For the same reason nothing here responds to
+   hover: no lift, no sweep, no cursor change. It is a list, drawn well.
+
+   How thick the glass looks is one number: --glass on .software-dock.
+   1 is the tuned setting. Take it to 0.5 and the slab thins toward a
+   plain translucent panel; take it to 1.4 and it thickens. Everything
+   below is written against it, so that one value is the whole dial.
+
+   What actually makes glass read as glass, in the order the layers sit:
+
+   1. The backdrop is hardly blurred at all and only lightly saturated.
+      Heavy blur is the first mistake: something you cannot see through
+      does not look transparent, it looks like a surface, and it erases
+      the detail the lens needs in order to show a bend. At 10px the
+      halftone under the bar was gone before the displacement reached
+      it; at 4px it was still going. A heavy saturation lift is the
+      second: it was propping up an invented backdrop with no colour of
+      its own, and over the wave, which is already a strong red, the
+      same figure turns it fluorescent.
+   2. The edge refracts, and does it without a boundary. A full-slab layer
+      takes a second pass of filtering and fades toward the middle, so the
+      colour gathers at the rim and thins inward with nothing to mark
+      where it stops. Masking a band instead, which is the obvious way to
+      do this, draws two hard edges and the result is a border.
+   3. The edge is lit unevenly - bright along the top, a weak return along
+      the bottom, nothing down the sides. An even stroke all the way round
+      is a plastic tray, whatever colour it is.
+   4. Dispersion is real, not painted: the lens runs three displacement
+      passes at three strengths, one per colour channel, so red bends
+      further than blue exactly where the bend is strongest. A painted
+      ring standing in for it was a second border around the first.
+   5. Speculars on top: a highlight across the upper edge, a hotspot off
+      the top left corner, a weaker pool bottom right.
+
+   None of it works over a flat background - there has to be something
+   behind the slab worth bending, which is why the bar sits across the
+   wave divider rather than above it. See .toolkit-shelf below. */
+.software-section {
+    position: relative;
+    background-color: var(--dark);
+    color: var(--white);
+    /* Heading and lede only now; the shelf below is its own block. */
+    padding: 10px 40px 26px;
+}
+
+/* The shelf sits across the wave.
+
+   Glass has nothing to do over a flat panel, and every invented backdrop
+   tried here - washes of red and amber laid down for the slab to bend -
+   read as decoration and cut off in a straight line against the sections
+   either side. The wave divider was already there. It is the site's own
+   shape, and it carries a real edge: dark above, red below, a long curve
+   running between the two. Putting half the bar on each side of that is
+   the entire effect, and it costs nothing.
+
+   The wave and the bar are laid over one another in one grid cell rather
+   than positioned. That centres the bar on the wave at any size, with no
+   measured offset to go stale when the row of icons changes, and it also
+   reserves the right height: the cell is as tall as whichever of the two
+   is taller, so on a phone, where the wave is 46px and the bar is three
+   rows, the band grows to fit the bar instead of the bar spilling into
+   whatever follows. */
+.toolkit-shelf {
+    position: relative;
+    display: grid;
+    grid-template-areas: "shelf";
+    /* Above the footer, which sets z-index 1 of its own. */
+    z-index: 2;
+}
+
+.toolkit-shelf > * {
+    grid-area: shelf;
+}
+
+/* Only visible where the band is taller than the wave, which is the phone
+   case: below the curve the page has to go on being red, and the wave
+   graphic is only 46px of it. Its own dark background paints over the
+   seam, so the join never shows. */
+.toolkit-shelf::before {
+    content: "";
+    grid-area: shelf;
+    align-self: stretch;
+    /* The join is placed at the wave's own bottom edge - half the band
+       plus half the wave - rather than at the band's midpoint. At the
+       midpoint it relies on the wave graphic painting over it to hide the
+       hard stop, which holds only as long as every browser centres a
+       fixed-height grid item the same way. Put where the wave actually
+       ends, there is nothing to hide. */
+    background: linear-gradient(
+        to bottom,
+        transparent 0 calc(50% + 80px),
+        var(--red) calc(50% + 80px) 100%
+    );
+}
+
+/* Something for the lens to bend.
+
+   A lens only shows what it distorts, and a flat field of red has nothing
+   in it to distort - which is why the displacement below reads as almost
+   nothing over the middle of the bar and only shows where the wave's edge
+   happens to pass under it. So the band carries a halftone: a dot screen,
+   at an opacity where it is barely a texture in the open and clearly a
+   warped grid once it goes under the glass, which is exactly where the
+   work is wanted. Screen printing is his own medium, so the pattern is
+   not a borrowed one.
+
+   It sits above the wave and below the bar, and fades out top and bottom
+   so it never reaches the edges of the band. */
+.toolkit-shelf::after {
+    content: "";
+    grid-area: shelf;
+    align-self: stretch;
+    z-index: 1;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 50% 50%,
+        rgba(255, 255, 255, 0.08) 0 1.9px,
+        rgba(255, 255, 255, 0) 2.7px);
+    background-size: 12px 12px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+}
+
+.toolkit-shelf .wave-divider--bottom {
+    align-self: center;
+}
+
+.toolkit-shelf-inner {
+    align-self: center;
+    z-index: 2;
+    padding: 0 40px;
+    /* Centred on the wave the bar sits just under the crest of the curve,
+       so the middle of it is all red and only the far ends catch the dark
+       - which looks like a bar lying on red rather than one lying across
+       an edge. Riding it up a little puts the curve inside the bar, where
+       it can be seen bending. With align-self: center the margin is part
+       of what gets centred, so this lifts the bar by half of it. */
+    margin-bottom: 52px;
+}
+
+.toolkit-shelf-inner .software-dock {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.software-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.software-section h2 {
+    font-size: 2.2rem;
+    font-weight: normal;
+    margin: 0 0 12px;
+}
+
+.software-lede {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin: 0;
+    color: #cfcfcf;
+}
+
+/* The slab. */
+.software-dock {
+    --glass: 1;
+    position: relative;
+    /* No isolation here. isolation: isolate makes an element a BACKDROP
+       ROOT, and a backdrop-filter inside a backdrop root can only see what
+       is painted inside it - so the lens was filtering this slab's own
+       white fill and nothing else. Every adjustment to the map, the
+       amplitudes and the backdrop behind the bar changed nothing, because
+       none of it was ever reaching the filter. */
+    border-radius: 34px;
+    padding: 18px 26px;
+    /* Kept low. A white fill this thing can see through is glass; opaque
+       enough to read as its own colour is a panel. */
+    background: linear-gradient(
+        158deg,
+        rgba(255, 255, 255, calc(0.055 * var(--glass))),
+        rgba(255, 255, 255, calc(0.01 * var(--glass))) 48%,
+        rgba(255, 255, 255, calc(0.03 * var(--glass)))
+    );
+    /* The blur and the saturation moved down to .dock-lens, and they
+       cannot come back here. An element that HAS a backdrop-filter is
+       itself a backdrop root, so a backdrop-filter on any descendant can
+       only see what is painted inside this slab - its own white fill and
+       nothing else. With the blur declared here, the lens below spent
+       every round displacing that fill and never once touched the page.
+       Same trap as isolation: isolate, reached a second way. One element
+       does all the backdrop work now. */
+    /* No border. A stroke all the way round is the one thing that makes
+       glass look like a plastic tray, however it is coloured. The edge is
+       lit instead, and lit unevenly: bright along the top where the light
+       is, a weak return along the bottom, almost nothing down the sides. */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, calc(0.6 * var(--glass))),
+        inset 0 -1px 0 rgba(255, 255, 255, calc(0.2 * var(--glass))),
+        /* the shelf: light collecting along the bottom inside face, the
+           way it does in the floor of a Dock */
+        inset 0 -34px 44px -34px rgba(255, 255, 255, calc(0.1 * var(--glass))),
+        0 22px 46px rgba(0, 0, 0, 0.5),
+        0 4px 10px rgba(0, 0, 0, 0.34);
+    overflow: hidden;
+}
+
+/* The lens: the layer that actually bends the backdrop.
+
+   Its filter lives in the markup (see the SVG in SoftwareSection.astro),
+   because a displacement map has to be a real filter primitive - there is
+   no CSS function for "move these pixels". Everything else the bar does
+   changes the colour of what is behind it; this changes where it is.
+
+   Kept as its own element on purpose. Safari does not support url() in
+   backdrop-filter and drops this declaration; folding it into the slab's
+   own filter would take the blur and the saturation down with it. Alone
+   like this, an unsupported browser loses the bend and keeps the rest. */
+.dock-lens {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    /* The one element doing backdrop work, and it has to be the only one:
+       nest a backdrop-filter inside another element that has one and the
+       inner filter sees only the outer element's own painting. So the
+       blur and the saturation ride here with the displacement. Safari,
+       which cannot resolve the url(), gets them put back on the slab in
+       the @supports block below. */
+    backdrop-filter:
+        url(#dock-lens-wide)
+        blur(calc(1.5px * var(--glass)))
+        saturate(calc(100% + 22% * var(--glass)));
+    -webkit-backdrop-filter:
+        url(#dock-lens-wide)
+        blur(calc(1.5px * var(--glass)))
+        saturate(calc(100% + 22% * var(--glass)));
+}
+
+/* Safari does not run url() filters in backdrop-filter, but it does parse
+   the declaration, and a reference it cannot resolve is a half-applied
+   filter rather than no filter - which is its own kind of bug to chase.
+   -webkit-named-image is Safari-only, so this turns the layer off there
+   outright: Safari gets the bar with every other layer intact and no
+   bend, which is a deliberate simpler version rather than an accident. */
+@supports (background: -webkit-named-image(i)) {
+    .dock-lens {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    /* and the blur goes back on the slab, where Safari can run it */
+    .software-dock {
+        -webkit-backdrop-filter:
+            blur(calc(1.5px * var(--glass)))
+            saturate(calc(100% + 22% * var(--glass)));
+        backdrop-filter:
+            blur(calc(1.5px * var(--glass)))
+            saturate(calc(100% + 22% * var(--glass)));
+    }
+}
+
+/* Zero height, zero width, out of the flow: it is a definition, not a
+   picture. Without this it reserves a line box. */
+.dock-lens-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* The speculars. */
+.dock-sheen {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        /* the highlight riding the upper edge, falling off fast */
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, calc(0.24 * var(--glass))) 0%,
+            rgba(255, 255, 255, calc(0.05 * var(--glass))) 14%,
+            rgba(255, 255, 255, 0) 38%
+        ),
+        /* the hotspot off the top left corner */
+        radial-gradient(44% 130% at 13% -36%, rgba(255, 255, 255, calc(0.22 * var(--glass))), transparent 62%),
+        /* and the weaker pool bottom right */
+        radial-gradient(60% 120% at 87% 134%, rgba(255, 255, 255, calc(0.14 * var(--glass))), transparent 60%);
+}
+
+/* A row of caustic lobes used to run along each rim here. They came
+   from an iOS screenshot where a busy wallpaper happened to break the
+   edge light into blobs; on a plain field they were just a bright band,
+   and the mask that held them to the edge stopped at a fixed inset, which
+   drew a second line round the inside of the bar. The widgets in a real
+   iOS screenshot have no such band. Removed. */
+
+/* A painted dispersion ring used to sit here - a conic gradient masked
+   to the outer 1.5px - standing in for colour splitting the filter could
+   not do. The filter does it now, per channel and in the right place, so
+   the painted one had become a second outline drawn just inside the
+   first: the double border. Removed rather than tuned. Two rings around
+   one edge is one too many however faint the second one is. */
+
+.dock-apps {
+    position: relative;
+    z-index: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    /* Columns are exactly an icon wide. With the captions gone there is
+       nothing else in a cell to set the width. */
+    grid-template-columns: repeat(auto-fit, 64px);
+    justify-content: center;
+    gap: 16px 18px;
+}
+
+.dock-app {
+    display: block;
+}
+
+.dock-icon {
+    position: relative;
+    display: block;
+    width: 64px;
+    height: 64px;
+}
+
+.dock-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* What lifts the icon off the glass. */
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+}
+
+/* The star sits on the icon's corner, not in a badge of its own: a chip
+   behind it would be one more little rounded square, which is exactly
+   what this rebuild took out. The dark stroke underneath is what keeps
+   it legible on the white icons (Word, Excel, Drive) as well as the
+   dark ones. */
+.dock-star {
+    position: absolute;
+    z-index: 2;
+    top: -7px;
+    right: -8px;
+    width: 23px;
+    height: 23px;
+    fill: #fbbf24;
+    stroke: rgba(30, 20, 0, 0.85);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    paint-order: stroke fill;
+    transform: rotate(-9deg);
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+}
+
+
+/* Safari on an older Mac, and any browser with the blur turned off, get a
+   flat translucent slab instead. It still reads as a shelf; it just is not
+   glass. Better than a transparent hole. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .software-dock {
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.07));
+    }
+}
+
 /* ─── Portfolio Split ────────────────────────── */
 
 /* Wraps .split-mobile-hint + .portfolio-split. Only exists so the mobile
@@ -1794,6 +2174,60 @@ main > h1:first-child {
     margin: 0;
 }
 
+/* A description can run to several paragraphs; without this they butt
+   straight up against each other. */
+.project-page-description + .project-page-description {
+    margin-top: 22px;
+}
+
+/* An inline link inside body copy, for the odd external reference. */
+.project-page-description a:not(.project-link),
+.intro-band-copy a:not(.project-link) {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: rgba(255, 255, 255, 0.45);
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.project-page-description a:not(.project-link):hover,
+.intro-band-copy a:not(.project-link):hover {
+    color: #fbbf24;
+    text-decoration-color: #fbbf24;
+}
+
+/* ─── One project naming another ───────────────── */
+/* A chip, sitting inside the sentence where the project is mentioned
+   rather than in a row of its own underneath. Sized off the surrounding
+   type (em, not px) so it stays proportional wherever it is dropped, and
+   short enough to carry only the name: what the thing actually is gets
+   said in the sentence around it, which is where it reads best anyway.
+   No arrow: at this size it read as clutter rather than as direction.
+
+   Amber rather than the blue used for the site's larger actions. These
+   appear on the dark project body and on the red intro band of a
+   collection's landing page, and blue on that red was the pairing that
+   did not work. Amber is the site's own accent and holds up on both. */
+.project-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 10px 2px;
+    border-radius: 5px;
+    background-color: #fbbf24;
+    color: var(--dark);
+    text-decoration: none;
+    font-size: 0.8em;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.project-link:hover {
+    background-color: #ffd257;
+}
+
+
 /* ─── Project Slider (Instagram-style carousel) ── */
 .image-slider {
     width: 100%;
@@ -1889,13 +2323,28 @@ main > h1:first-child {
     z-index: 6;
 }
 
+/* Caption for the photograph currently on screen. Detail lives here,
+   next to the thing it describes, rather than in the project's write-up. */
+.slide-caption {
+    margin: 0;
+    padding: 4px 24px 0;
+    text-align: center;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.88);
+}
+
 /* Instagram-style dot pagination, below the frame */
 .slide-dots {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Wraps rather than overflowing: the Italy project runs to 25 slides,
+       which is wider than a phone screen in a single row of dots. */
+    flex-wrap: wrap;
     gap: 9px;
-    padding: 16px 0;
+    padding: 16px;
 }
 
 .slide-dot {
@@ -1916,6 +2365,672 @@ main > h1:first-child {
 .slide-dot.active {
     background: #fbbf24;
     transform: scale(1.3);
+}
+
+/* Cover crop pulled toward the top of the photo - for a portrait image
+   whose subject sits high in the frame, a centered 16:9 crop cuts the head
+   off. */
+.project-image img.cover--top {
+    object-position: center 25%;
+}
+
+/* ─── Closer look ────────────────────────────────────────── */
+/* The magnifier that appears over a carousel slide on hover, and the
+   full-screen viewer it opens. Shared by every carousel on the site -
+   see CloserLook.jsx. */
+
+.slide-media {
+    position: relative;
+    width: 100%;
+}
+
+/* The cursor is the affordance: a magnifier over any photograph that opens
+   in the closer-look viewer. */
+.slide-media img,
+.posters-track li img,
+.exhibit-track img {
+    cursor: zoom-in;
+}
+
+.closer-look-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 6;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #fbbf24;
+    border-radius: 50%;
+    color: var(--white);
+    cursor: zoom-in;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.closer-look-btn svg {
+    width: 19px;
+    height: 19px;
+}
+
+/* Revealed by hovering the slide, and whenever it is keyboard-focused */
+.slide-media:hover .closer-look-btn,
+.flip-card:hover .closer-look-btn,
+.posters-track-wrapper:hover .closer-look-btn,
+.exhibit-photo:hover .closer-look-btn,
+.closer-look-btn:focus-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.closer-look-btn:hover {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* No hover on a touchscreen, so the button simply stays put */
+@media (hover: none) {
+    .closer-look-btn {
+        opacity: 0.85;
+        transform: scale(1);
+    }
+}
+
+/* On the posters carousel the poster is centred and narrower than the
+   slider, so the button is positioned off its measured width (see
+   halfImgWidth in PostersSlider.jsx) rather than off the frame. */
+.closer-look-btn--poster {
+    top: 52px;
+    left: auto;
+}
+
+/* ── The viewer ── */
+.closer-look {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(10, 10, 10, 0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Deep bottom padding so the photograph never reaches the caption and
+       the zoom bar - they sit in clear space under it rather than on top
+       of the picture. */
+    padding: 40px 40px 132px;
+    cursor: zoom-out;
+    animation: closer-look-in 0.18s ease-out;
+}
+
+@keyframes closer-look-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.closer-look-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+    cursor: zoom-in;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.closer-look-img.is-zoomed {
+    cursor: grab;
+}
+
+.closer-look-img.is-panning {
+    cursor: grabbing;
+}
+
+.closer-look-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.closer-look-close:hover,
+.closer-look-close:focus-visible {
+    background: rgba(0, 0, 0, 0.85);
+    border-color: #fbbf24;
+}
+
+.closer-look-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.closer-look-nav:hover,
+.closer-look-nav:focus-visible {
+    background: rgba(0, 0, 0, 0.85);
+    border-color: #fbbf24;
+}
+
+.closer-look-nav--prev { left: 20px; }
+.closer-look-nav--next { right: 20px; }
+
+.closer-look-bar {
+    position: absolute;
+    left: 50%;
+    bottom: 58px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+}
+
+.closer-look-bar button {
+    min-width: 38px;
+    height: 34px;
+    padding: 0 10px;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    color: var(--white);
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.closer-look-bar button:hover,
+.closer-look-bar button:focus-visible {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.closer-look-reset {
+    min-width: 62px;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+}
+
+.closer-look-caption {
+    position: absolute;
+    left: 50%;
+    bottom: 100px;
+    transform: translateX(-50%);
+    max-width: min(760px, 88vw);
+    margin: 0;
+    z-index: 2;
+    text-align: center;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+}
+
+.closer-look-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    margin: 0;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .closer-look { animation: none; }
+    .closer-look-img { transition: none; }
+}
+
+/* ─── Album view (the grid inside an album project) ─────── */
+/* A project with six or more photos opens on this grid rather than
+   dropping straight into the carousel - clicking any photo opens the
+   carousel at it, and the carousel keeps a way back here. */
+/* Same dark, gutter-padded, full-width shell as the posters album view -
+   the album pages deliberately skip the 900px .project-tile wrapper so
+   the grid can use the whole page and fit as many columns as the screen
+   allows. */
+.album-view {
+    background-color: #111;
+    padding: 32px 40px;
+    margin-top: 24px;
+}
+
+/* On an album page the carousel has no .project-tile around it, so it
+   carries its own contained red card. */
+.image-slider--standalone {
+    max-width: 900px;
+    margin: 24px auto 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.album-view-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 4px 4px 14px;
+}
+
+.album-view-count {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    opacity: 0.85;
+}
+
+.album-back-btn {
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid #fbbf24;
+    color: var(--white);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.album-back-btn:hover {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* Columns rather than a fixed grid: these photographs are a mix of
+   landscape textiles and portrait prints, and every preview keeps its
+   source image's own shape instead of being cropped to a common tile.
+   Items flow down each column, so nothing is left with dead space under
+   it the way ragged grid rows would be. */
+/* One photograph in an album can be marked as the key image and given two
+   columns. The masonry measures tiles after they render, so a wider tile
+   comes back taller on its own and the rest of the grid packs around it.
+   Below the breakpoint the grid is often a single column, where a second
+   column does not exist to span into. */
+.album-thumb--feature {
+    grid-column: span 2;
+}
+
+/* The phone grid is two columns, so the key image spans both and stays
+   the first thing on the page. Only on the narrowest screens does the
+   grid fall to a single column, where there is no second one to span
+   into and the rule has to be given up. */
+@media (max-width: 340px) {
+    .album-thumb--feature {
+        grid-column: span 1;
+    }
+}
+
+.album-grid {
+    display: grid;
+    /* 240px, not the posters grid's 150px: a poster is a tall graphic that
+       still reads at thumbnail size, where these are photographs of objects
+       that need room before they are worth clicking. ALBUM_TILE_MIN in
+       ProjectSlider.jsx must match this. */
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-auto-rows: 8px;
+    gap: 16px;
+}
+
+/* Lifts, deepens its shadow and picks up a gold outline on hover, the
+   same as .poster-grid-item in the posters album. */
+.album-thumb {
+    position: relative;
+    display: block;
+    width: 100%;
+    /* Replaced per item by the measured span (see ProjectSlider.jsx);
+       this is only what the grid looks like for the moment before that
+       runs. */
+    grid-row-end: span 18;
+    align-self: start;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, outline-color 0.25s ease;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* Until the spans are measured the previews are held back rather than
+   shown clipped to a uniform tile. */
+.album-grid:not(.is-laid-out) .album-thumb {
+    visibility: hidden;
+}
+
+.album-thumb img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.4s ease;
+}
+
+.album-thumb:hover,
+.album-thumb:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+    outline-color: #fbbf24;
+}
+
+.album-thumb:hover img,
+.album-thumb:focus-visible img {
+    transform: scale(1.06);
+}
+
+/* Marks a two-sided piece in the grid, where only the front shows */
+.album-thumb-flag {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid #fbbf24;
+    color: var(--white);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+}
+
+.album-back-row {
+    padding: 16px 16px 0;
+}
+
+/* ─── Album tiles (6+ photos) ─────────────────── */
+/* A tile holding six or more photographs is an album rather than a single
+   project image: it keeps one cover photo and says how much is inside.
+   Sits opposite the Pinned badge so the two never collide. */
+.project-image .album-badge {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid #fbbf24;
+    color: var(--white);
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.project-image .album-badge-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* ─── Collection landing page: intro band + closing strip ─── */
+/* Scene-setting photographs that belong to no album. They sit inside
+   .projects-section so they share the album tiles' width, radius and 40px
+   rhythm - the whole page then reads as one column of blocks rather than
+   three unrelated shapes. */
+.intro-band {
+    display: grid;
+    /* A wide photo column: the band's height comes from the photograph at
+       its own full 4:3, uncropped, and the copy simply centres itself in
+       the red panel beside it. */
+    grid-template-columns: 1.62fr 1fr;
+    border-radius: 12px;
+    overflow: hidden;
+    /* Clears the title bar above and keeps the same 40px rhythm as the
+       gap between the album tiles below. */
+    margin: 40px 0;
+}
+
+.intro-band-photo,
+.intro-band-copy {
+    min-height: 0;
+}
+
+.intro-band-photo {
+    margin: 0;
+    height: 100%;
+}
+
+.intro-band-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.intro-band-copy {
+    background-color: var(--red);
+    padding: 40px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.intro-band-copy p {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.95;
+    color: var(--white);
+    margin: 0 0 18px;
+}
+
+.intro-band-copy p:last-child {
+    margin-bottom: 0;
+}
+
+/* ─── Album tiles (6+ photos) ─────────────────── */
+/* A tile holding six or more photographs is an album rather than a single
+   project image: it keeps one cover photo and says how much is inside.
+   Sits opposite the Pinned badge so the two never collide. */
+.project-image .album-badge {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid #fbbf24;
+    color: var(--white);
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.project-image .album-badge-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* ─── Section intro (a collection's landing page) ───────── */
+/* Scene-setting photographs and copy above a grid of albums - they belong
+   to no album themselves, they just introduce the collection and point at
+   the albums underneath. */
+.section-intro {
+    max-width: 1100px;
+    margin: 32px auto 44px;
+    padding: 0 20px;
+}
+
+.section-intro-hero,
+.section-intro-portrait {
+    margin: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.section-intro-hero img,
+.section-intro-portrait img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.section-intro-row {
+    display: flex;
+    /* Centred: the portrait is a good deal taller than the copy beside it,
+       and top-aligning the two left a conspicuous hole under the text. */
+    align-items: center;
+    gap: 32px;
+    margin-top: 28px;
+}
+
+.section-intro-portrait {
+    flex: 0 0 30%;
+}
+
+.section-intro-text {
+    flex: 1;
+}
+
+.section-intro-text p {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.95;
+    color: var(--white);
+    margin: 0 0 20px;
+}
+
+.section-intro-text p:last-child {
+    margin-bottom: 0;
+}
+
+/* ─── Two-sided pieces (Italy textiles) ─────── */
+/* These textiles are printed on both sides of the fabric, so the two
+   photographs of one piece are the same object rather than two slides:
+   the card turns over in place and the arrows/dots still move between
+   pieces. */
+.flip-card {
+    position: relative;
+    width: 100%;
+    perspective: 1600px;
+}
+
+.flip-card .flip-card-inner {
+    position: relative;
+    width: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.flip-card .flip-card-inner:focus-visible {
+    outline: 3px solid #fbbf24;
+    outline-offset: 4px;
+}
+
+.flip-card.is-flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card .flip-face {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* The front stays in normal flow so the card keeps the photograph's own
+   height at any width; the reverse is laid over it already turned, so the
+   two faces can never both be visible mid-rotation. */
+.flip-card .flip-face--back {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    transform: rotateY(180deg);
+}
+
+/* Mirrors the .slide-counter pill, opposite corner */
+.flip-card .flip-hint {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #fbbf24;
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    z-index: 6;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.flip-card .flip-hint:hover {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.flip-card .flip-hint-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flip-card .flip-card-inner {
+        transition: none;
+    }
 }
 
 /* ─── Home Nav (bigger) ──────────────────────── */
@@ -2753,9 +3868,10 @@ html, body {
        the split first. .home-sections wraps <PortfolioSplit /> and
        <AboutSection /> in index.astro; PortfolioSplit renders a single
        .portfolio-split-wrap, while AboutSection renders three siblings
-       (its own wave-divider--top, .about-section, wave-divider--bottom).
+       (its own wave-divider--top, .about-section, .software-section,
+       wave-divider--bottom).
        Everything defaults to flex order:0, so giving only
-       .portfolio-split-wrap a higher order pushes it after all three of
+       .portfolio-split-wrap a higher order pushes it after all four of
        AboutSection's pieces - which stay in their existing relative
        order (order only breaks ties by original position, it doesn't
        reorder same-order items) - with no need to also touch the wave
@@ -3318,6 +4434,7 @@ html, body {
         font-size: 1rem;
     }
 
+
     .image-slider-frame {
         padding: 10px;
         gap: 4px;
@@ -3333,6 +4450,104 @@ html, body {
        diverge again later. */
     .image-slider-lr-toggle {
         display: none;
+    }
+
+    /* ─── Closer look ────────────────────────── */
+    .closer-look {
+        padding: 16px 16px 124px;
+    }
+
+    /* Swipe-sized screens get smaller arrows tucked into the corners so
+       they never sit over the middle of the photograph. */
+    .closer-look-nav {
+        width: 40px;
+        height: 40px;
+        top: auto;
+        bottom: 98px;
+        transform: none;
+    }
+
+    .closer-look-nav--prev { left: 12px; }
+    .closer-look-nav--next { right: 12px; }
+
+    .closer-look-close {
+        top: 12px;
+        right: 12px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .closer-look-bar {
+        bottom: 48px;
+    }
+
+    .closer-look-caption {
+        bottom: 92px;
+        font-size: 0.78rem;
+    }
+
+    .slide-caption {
+        padding: 4px 14px 0;
+        font-size: 0.8rem;
+    }
+
+    .closer-look-hint {
+        font-size: 0.65rem;
+    }
+
+    .closer-look-btn {
+        top: 10px;
+        left: 10px;
+        width: 34px;
+        height: 34px;
+    }
+
+    .closer-look-btn--poster {
+        top: 46px;
+    }
+
+    /* ─── Collection landing page ────────────── */
+    .intro-band {
+        grid-template-columns: 1fr;
+        /* The desktop rule pins a single explicit row to the band's fixed
+           height; stacked on a phone the band is content-height, so both
+           the photo and the copy need their own auto row or the copy is
+           pushed into an implicit one and clipped. */
+        grid-template-rows: auto auto;
+        height: auto;
+        margin: 24px 0;
+    }
+
+    .intro-band-photo img {
+        aspect-ratio: 4 / 3;
+        height: auto;
+        object-position: center 30%;
+    }
+
+    .intro-band-copy {
+        padding: 24px 20px;
+    }
+
+    .intro-band-copy p {
+        font-size: 1rem;
+    }
+
+    /* ─── Album view ─────────────────────────── */
+    .album-view {
+        padding: 20px 24px;
+    }
+
+    .album-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .album-view-head {
+        padding: 2px 2px 10px;
+    }
+
+    .album-back-row {
+        padding: 10px 10px 0;
     }
 
     /* ─── Posters Slider ─────────────────────── */
@@ -3517,4 +4732,1067 @@ body footer {
 /* ─── Remove dark gap before footer ─────────── */
 body main {
     flex: none;
+}
+/* ─── The Eclipse: exhibition index ──────────── */
+/* The show is numbered - every piece stands on a stained plywood base with
+   a laser-etched plaque reading "<numeral> of VIII" - so the page is built
+   as that index rather than as another carousel. The shell, the intro band
+   and the album underneath are all the site's existing furniture; only the
+   index itself is new. */
+
+.eclipse-page .projects-section {
+    /* Wider than the other project pages because the index is two columns
+       of entries, and each entry is itself a photograph with its text beside
+       it - four columns of content across the page. */
+    max-width: 1300px;
+    padding: 0 40px;
+}
+
+/* The band's photograph fills the band's height, which means any difference
+   between the photograph's own height and the copy's is taken out of its
+   sides. The wide establishing shot is the one picture that shows both ends
+   of the room at once, so losing its edges loses Origin, standing at the far
+   left. The three settings below exist to keep that difference near zero: a
+   wider photo column, and copy set smaller and tighter than the Italy
+   landing page's. Check this photograph again if the copy is ever rewritten
+   at length. */
+.eclipse-page .intro-band {
+    grid-template-columns: 1.4fr 1fr;
+}
+
+.eclipse-page .intro-band-photo {
+    overflow: hidden;
+}
+
+.eclipse-page .intro-band-photo img {
+    height: 100%;
+    object-fit: cover;
+}
+
+.eclipse-page .intro-band-copy {
+    padding: 34px 38px;
+}
+
+.eclipse-page .intro-band-copy p {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    margin-bottom: 14px;
+}
+
+.eclipse-page .intro-band-copy .project-meta {
+    margin-bottom: 18px;
+}
+
+.eclipse-section {
+    margin: 64px 0 0;
+}
+
+.eclipse-section-head {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+    padding-bottom: 14px;
+    margin-bottom: 36px;
+}
+
+.eclipse-section-head h2 {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1.35rem;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.eclipse-section-head p {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--white);
+    opacity: 0.72;
+    margin: 10px 0 0;
+    max-width: 62ch;
+}
+
+/* Two columns, laid out as the room was: the cast pieces stood along the
+   fireplace on the left, the foam stunt doubles along the bar on the right,
+   so reading the index left to right is walking the room. Each column is an
+   ordinary stack, which is also what the whole thing collapses to on a
+   phone - where the left column still comes first. */
+.exhibit-sides {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* One row for the two column headings, then one per piece. Filling by
+       column rather than by row is what keeps each side's pieces in their own
+       column while still sharing rows, so the two columns stay level with
+       each other however long one entry's note runs. The markup stays in
+       reading order - fireplace side first, then bar side - which is what the
+       single column falls back to on a phone. */
+    grid-template-rows: auto repeat(4, auto);
+    grid-auto-flow: column;
+    gap: 24px 30px;
+}
+
+/* The two <section>s are for meaning, not layout: their children are the
+   grid items. */
+.exhibit-side {
+    display: contents;
+}
+
+.exhibit-side-head {
+    align-self: end;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    padding-bottom: 12px;
+}
+
+.exhibit-side-head h3 {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1rem;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0;
+}
+
+.exhibit-side-head p {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--white);
+    opacity: 0.7;
+    margin: 8px 0 0;
+}
+
+/* One entry per piece, stacked: the photographs at their own 4:5 above,
+   everything the plaque says below. Half the page wide, a photo column and
+   a text column side by side would leave the note two words across. */
+/* One entry per piece: the photographs on the left at their own 4:5, and
+   everything the plaque says on the right. height: 100% takes whatever the
+   shared row gives it, so entries facing each other across the two columns
+   finish level even when one note runs longer. */
+.exhibit-piece {
+    display: grid;
+    grid-template-columns: minmax(0, 240px) 1fr;
+    height: 100%;
+    background: var(--red);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.exhibit-piece.is-in {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .exhibit-piece {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* The shape comes from a spacer rather than aspect-ratio on the element
+   itself: every piece photograph is 4:5, so the spacer sets how tall the
+   entry is, but leaving the height auto also lets the column stretch when
+   the text beside it runs longer - with aspect-ratio the photograph would
+   stop short and leave a bare strip of red under it. */
+.exhibit-photo {
+    position: relative;
+    background: #111;
+}
+
+.exhibit-photo::before {
+    content: "";
+    display: block;
+    padding-top: 125%;
+}
+
+/* A piece photographed from more than one angle carries its own small
+   carousel here: one track, one clone at each end, exactly the way the
+   site's other carousels move. Keeping it inside the entry is the point -
+   these are three views of one helmet, not three more photographs to walk
+   past. */
+.exhibit-track {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.exhibit-track ul {
+    display: flex;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    transition: transform 0.45s ease;
+}
+
+.exhibit-track li {
+    flex: 0 0 100%;
+    height: 100%;
+}
+
+/* The photograph fills its column, and the column is as tall as the row, so
+   a tall row crops the photograph's sides. That is fine up to a point and
+   makes a nice tight portrait; past it the helmet starts losing its own
+   edges. The cap stops the crop there and lets the column's dark show below,
+   which reads as a mount rather than a mistake. Nothing reaches it at the
+   moment; it is here so a future entry with more in it cannot quietly crop
+   the one facing it across the row. */
+.exhibit-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 500px;
+    bottom: auto;
+    object-fit: cover;
+}
+
+/* The entry's frame is a fraction of a carousel slide's width, so the
+   magnifier comes down with it and moves clear of the numeral, which now
+   sits in the opposite corner. */
+.exhibit-photo .closer-look-btn {
+    top: 9px;
+    left: 9px;
+    width: 30px;
+    height: 30px;
+}
+
+.exhibit-photo .closer-look-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Arrows and counter sit above the track. They fade in on hover on a
+   desktop and stay put on a touch screen, where there is no hover to
+   reveal them and the swipe is the main gesture anyway. */
+.exhibit-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--white);
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s ease, background 0.25s ease;
+}
+
+.exhibit-nav--prev { left: 7px; }
+.exhibit-nav--next { right: 7px; }
+
+.exhibit-piece:hover .exhibit-nav,
+.exhibit-nav:focus-visible {
+    opacity: 1;
+}
+
+.exhibit-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.exhibit-count {
+    position: absolute;
+    right: 9px;
+    top: 9px;
+    z-index: 3;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: var(--white);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+}
+
+.exhibit-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 9px;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.exhibit-dot {
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.exhibit-dot.is-active {
+    background: #fbbf24;
+    transform: scale(1.25);
+}
+
+@media (hover: none) {
+    .exhibit-nav {
+        opacity: 1;
+    }
+}
+
+/* The numeral in the corner of the photograph, so an entry is still
+   identifiable once it is scrolled past the text beside it. Bottom left,
+   not top: the closer-look magnifier owns the top-left corner of every
+   photograph on the site, and on a touch screen it is always showing. */
+.exhibit-tag {
+    position: absolute;
+    left: 9px;
+    bottom: 9px;
+    z-index: 2;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #fbbf24;
+    color: #fbbf24;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+}
+
+.exhibit-detail {
+    padding: 26px 28px;
+    display: flex;
+    flex-direction: column;
+    /* Top-aligned rather than centred: the rows are already height-matched,
+       so starting every entry on the same line is what makes the page read
+       as an index instead of eight separate cards. */
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+.exhibit-numeral {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: #fbbf24;
+    margin: 0 0 8px;
+    letter-spacing: 0.06em;
+}
+
+.exhibit-of {
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    opacity: 0.75;
+    text-transform: uppercase;
+}
+
+.exhibit-name {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 1.2rem;
+    color: var(--white);
+    margin: 0;
+}
+
+.exhibit-subtitle {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--white);
+    opacity: 0.78;
+    margin: 6px 0 0;
+    letter-spacing: 0.04em;
+}
+
+.exhibit-note {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.84rem;
+    line-height: 1.75;
+    color: var(--white);
+    margin: 14px 0 0;
+}
+
+/* Other angles on the same piece. These drive the carousel above rather
+   than opening the viewer, so the active one is marked - they are a second
+   way to reach a view, next to the arrows and the dots, and they are the
+   only one that says what each view is. */
+.exhibit-alts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.exhibit-alt {
+    border: none;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    width: 58px;
+    text-align: left;
+}
+
+.exhibit-alt img {
+    display: block;
+    width: 58px;
+    height: 58px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #111;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 0.25s ease, transform 0.25s ease;
+}
+
+.exhibit-alt:hover img,
+.exhibit-alt:focus-visible img {
+    outline-color: rgba(251, 191, 36, 0.55);
+    transform: translateY(-2px);
+}
+
+.exhibit-alt.is-active img {
+    outline-color: #fbbf24;
+}
+
+.exhibit-alt.is-active span {
+    opacity: 1;
+}
+
+.exhibit-alt span {
+    display: block;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+/* The plaque sits at the foot of the entry, cropped to the etched strip
+   itself - it is the label for everything above it, and it is also the
+   evidence for the numeral and the name. */
+.exhibit-plaque {
+    display: block;
+    margin-top: 18px;
+    padding: 0;
+    border: none;
+    width: 100%;
+    max-width: 260px;
+    aspect-ratio: 3 / 1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #111;
+    cursor: pointer;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 0.25s ease;
+}
+
+.exhibit-plaque:hover,
+.exhibit-plaque:focus-visible {
+    outline-color: #fbbf24;
+}
+
+.exhibit-plaque img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* The plaque is centred in its own photograph, so a centre crop lands
+       on the etching every time. */
+    object-position: center center;
+    transition: transform 0.4s ease;
+}
+
+.exhibit-plaque:hover img {
+    transform: scale(1.05);
+}
+
+/* ─── The Eclipse: how it was made ───────────── */
+/* A list rather than a paragraph: these are nine unrelated facts about
+   nine different parts, and as prose they would read as filler. */
+.making-grid {
+    display: grid;
+    /* Three across at this page width: each note is a single sentence, and
+       over two columns they would run to eighty-odd characters a line. */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 40px;
+    margin: 0;
+}
+
+@media (max-width: 1080px) {
+    .making-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.making-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 16px 0;
+}
+
+.making-item dt {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fbbf24;
+}
+
+.making-item dd {
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--white);
+    margin: 7px 0 0;
+}
+
+/* The album keeps the whole page width, so its own heading has to come
+   back to the text column above it rather than sit inside it. */
+.eclipse-section--album {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .eclipse-page .projects-section {
+        padding: 0 20px;
+    }
+
+    .eclipse-section {
+        margin-top: 44px;
+    }
+
+    .eclipse-section-head h2 {
+        font-size: 1.1rem;
+    }
+
+    /* The button drops below the heading rather than being squeezed beside
+       it, and loses the desktop bottom alignment along with it. Tighter type
+       keeps it and its page count on one line at phone widths. */
+    .eclipse-section-head--split {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+    }
+
+    /* Under the heading it goes back to the left edge, in line with the text
+       above it. */
+    .eclipse-doc {
+        flex: none;
+        justify-content: flex-start;
+    }
+
+    .eclipse-doc .watch-btn {
+        padding: 10px 18px;
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+    }
+
+    .eclipse-doc .duration-label {
+        white-space: nowrap;
+    }
+
+    /* Stacked: at half a phone's width the photograph and the text cannot sit
+       side by side. The two columns of the index itself are untouched, so a
+       double still faces the helmet it doubles for. */
+    .exhibit-piece {
+        grid-template-columns: 1fr;
+    }
+
+    .making-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+/* Link to the written comp. It sits in the empty right-hand half of the index
+   heading, and it borrows the filmmaking page's own action button rather than
+   inventing a third button style for the site: .watch-btn's blue, with the
+   gold .duration-label beside it carrying the length, exactly as a video tile
+   carries its running time. */
+.eclipse-section-head--split {
+    display: flex;
+    /* Centred against the whole heading block rather than sitting on the
+       baseline of the note's last line, which pinned it to the corner. */
+    align-items: center;
+    gap: 36px;
+}
+
+.eclipse-section-head-text {
+    min-width: 0;
+}
+
+/* Takes the width the note's own measure leaves over and centres the button
+   in it, so the button reads as occupying that space rather than being pushed
+   into the far corner of it. */
+.eclipse-doc {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.eclipse-doc .watch-btn {
+    gap: 9px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.eclipse-doc-icon {
+    width: 16px;
+    height: 16px;
+}
+
+
+
+/* ─── The Eclipse: the music video on its own entry ─── */
+/* The poster frame sits in the thumbnail row rather than under the note, so
+   an entry that carries a film is no taller than one that does not - the
+   music video was pushing its own entry, and the one facing it across the
+   row, half again as tall. It is 16:9 against the square stills, with the
+   filmmaking page's own play button on it, and it opens that page's video
+   modal. */
+.exhibit-alt--video {
+    width: 103px;
+}
+
+.exhibit-video-shot {
+    position: relative;
+    display: block;
+    width: 103px;
+    height: 58px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #111;
+    /* Kills the inline baseline gap under the image, so this chip's caption
+       sits on the same line as the stills' captions beside it. */
+    line-height: 0;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 0.25s ease, transform 0.25s ease;
+}
+
+.exhibit-alt--video img {
+    width: 103px;
+    height: 58px;
+    border-radius: 0;
+    outline: none;
+}
+
+.exhibit-alt--video:hover .exhibit-video-shot,
+.exhibit-alt--video:focus-visible .exhibit-video-shot {
+    outline-color: #fbbf24;
+    transform: translateY(-2px);
+}
+
+.exhibit-alt--video:hover img,
+.exhibit-alt--video:focus-visible img {
+    outline: none;
+    transform: none;
+}
+
+/* The shared .play-button is sized for the filmmaking grid's 270px tiles: an
+   80px circle and a 40px triangle, so 53% and 26% of the frame's height.
+   These are the same two fractions of this chip, which is what makes a mark
+   an eighth the size still read as the same play button. */
+.exhibit-video-shot .play-button {
+    width: 31px;
+    height: 31px;
+}
+
+.exhibit-video-shot .play-button svg {
+    width: 15px;
+    height: 15px;
+    margin-left: 1px;
+}
+
+.exhibit-video-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'Chelsea Market', Arial, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: #fbbf24;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    opacity: 0.85;
+}
+
+.exhibit-video-link:hover {
+    opacity: 1;
+}
+
+
+/* ─── The written comp, opened in the reader ─── */
+/* Reuses the video modal's backdrop and close button; only the frame differs,
+   because a document wants height rather than a 16:9 box. */
+/* The sheet inside the frame is 8.5 by 11, not the frame itself: the viewer
+   puts a 59px toolbar along the top, so a frame at the paper's ratio leaves
+   the page short by that much. The frame is the page plus the toolbar, which
+   is what makes exactly one whole page sit in view with nothing to scroll.
+
+   Width comes from the height the viewport can spare - 40px of modal padding
+   top and bottom, the 50px the close button sits above the content, and the
+   toolbar - so the page is always as large as it can be without being cut
+   off. The 92vw term catches short, wide windows where that height would make
+   it wider than the screen. */
+.modal-content--doc {
+    --doc-frame: min(calc((100vh - 209px) * 0.7727), 92vw);
+    width: var(--doc-frame);
+    max-width: none;
+}
+
+.modal-doc-wrapper {
+    position: relative;
+    width: 100%;
+    height: calc(var(--doc-frame) * 1.2941 + 59px);
+    overflow: hidden;
+    border-radius: 8px;
+    background: #222;
+}
+
+.modal-doc-wrapper iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+}
+
+/* The reader's two frame shapes, and the row they are switched from. The
+   close button loses its own absolute position here and sits in the row
+   instead, so the toggle can sit beside it without either being nudged by
+   hand. */
+.modal-doc-controls {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.modal-doc-controls .modal-close {
+    position: static;
+    top: auto;
+    right: auto;
+    line-height: 0.7;
+}
+
+.doc-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.doc-view-toggle svg {
+    width: 15px;
+    height: 15px;
+    color: #fbbf24;
+}
+
+/* Wide view: the frame the window wants rather than the one the paper wants.
+   The viewer is in fit-width mode, and it re-fits on resize, so the page grows
+   to fill this frame and shrinks back again when the toggle goes the other
+   way. That is the whole reason the src is never touched: re-navigating to a
+   different view parameter is ignored by the viewer once it has loaded, and
+   remounting the iframe to force it would cost the reader their place. */
+.modal-content--doc.is-wide {
+    width: min(1200px, 94vw);
+}
+
+.modal-doc-wrapper.is-wide {
+    height: min(84vh, 1180px);
+}
+
+
+/* ─── The Toolkit on a phone ─── */
+/* The slab stays one slab; only the shelf inside it wraps. Five across at
+   390px, which keeps the whole toolkit to three rows without the icons
+   getting so small the marks stop being readable. */
+@media (max-width: 768px) {
+    .software-section {
+        padding: 6px 22px 20px;
+    }
+
+    .toolkit-shelf-inner {
+        padding: 0 22px;
+    }
+
+
+    .software-section h2 {
+        font-size: 1.7rem;
+    }
+
+    .software-lede {
+        font-size: 0.95rem;
+    }
+
+    .software-dock {
+        border-radius: 26px;
+        padding: 16px 12px 14px;
+    }
+
+    .dock-lens {
+        backdrop-filter:
+            url(#dock-lens-tall)
+            blur(calc(1.5px * var(--glass)))
+            saturate(calc(100% + 22% * var(--glass)));
+        -webkit-backdrop-filter:
+            url(#dock-lens-tall)
+            blur(calc(1.5px * var(--glass)))
+            saturate(calc(100% + 22% * var(--glass)));
+    }
+
+    /* Half of the phone wave's 46px, not the desktop wave's 160px. */
+    .toolkit-shelf::before {
+        background: linear-gradient(
+            to bottom,
+            transparent 0 calc(50% + 23px),
+            var(--red) calc(50% + 23px) 100%
+        );
+    }
+
+    .dock-apps {
+        grid-template-columns: repeat(auto-fit, 52px);
+        gap: 14px 12px;
+    }
+
+    .dock-icon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .dock-star {
+        width: 19px;
+        height: 19px;
+        top: -6px;
+        right: -6px;
+        stroke-width: 1.9;
+    }
+
+}
+
+/* ─── The Eclipse landing page on a phone ─── */
+/* This page's intro band is given two columns further up the sheet, by a
+   selector as specific as the generic mobile rule and later in the file, so
+   the band would otherwise never stack on a phone. Restated here, after both. */
+@media (max-width: 768px) {
+    .eclipse-page .intro-band {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .eclipse-page .intro-band-photo img {
+        height: auto;
+        object-fit: cover;
+    }
+
+    .eclipse-page .intro-band-copy {
+        padding: 26px 22px 30px;
+    }
+
+    .eclipse-page .intro-band-copy p {
+        font-size: 0.95rem;
+        line-height: 1.8;
+    }
+}
+
+/* ─── The Eclipse index on a phone ─── */
+/* The two columns hold at every width, so a stunt double always sits directly
+   opposite the helmet it doubles for. What changes on a phone is that each
+   entry is reduced to its cover: photograph, numeral, name, and the other
+   angles as thumbnails in the space beside them, which both fills that space
+   and tells a visitor the other angles are there. The note and the plaque move
+   into the closer-look viewer, one tap away on the photograph, rather than
+   expanding anything in place. */
+@media (max-width: 768px) {
+    .exhibit-sides {
+        gap: 14px 10px;
+    }
+
+    .exhibit-side-head h3 {
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+    }
+
+    .exhibit-side-head p {
+        font-size: 0.7rem;
+        line-height: 1.55;
+        margin-top: 5px;
+    }
+
+    .exhibit-detail {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px 12px 14px;
+    }
+
+    .exhibit-head {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .exhibit-numeral {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+        /* "I of VIII" broken over two lines reads as two numerals. */
+        white-space: nowrap;
+    }
+
+    .exhibit-of {
+        font-size: 0.55rem;
+    }
+
+    .exhibit-name {
+        font-size: 0.92rem;
+        line-height: 1.25;
+    }
+
+    .exhibit-subtitle {
+        font-size: 0.68rem;
+        margin-top: 2px;
+    }
+
+    /* The note and the plaque live in the viewer instead - see the caption the
+       component builds for a piece's main photograph. */
+    .exhibit-note,
+    .exhibit-plaque {
+        display: none;
+    }
+
+    /* One thumbnail wide, stacked down the empty right-hand edge beside the
+       name. No piece has more than two other views, so the stack is never
+       taller than the three lines of text it sits next to, and one column
+       rather than two leaves the name its full width: at 169px a card cannot
+       afford the 86px a second column of thumbnails costs. Their captions go:
+       at this size the picture is the label. */
+    .exhibit-alts {
+        flex: 0 0 auto;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        width: 40px;
+        margin-top: 2px;
+        gap: 5px;
+    }
+
+    .exhibit-alt,
+    .exhibit-alt--video,
+    .exhibit-video-shot {
+        width: 40px;
+    }
+
+    .exhibit-alt img,
+    .exhibit-alt--video img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .exhibit-alt span {
+        display: none;
+    }
+
+    .exhibit-video-shot {
+        height: 40px;
+    }
+
+    .exhibit-video-shot .play-button {
+        width: 21px;
+        height: 21px;
+    }
+
+    .exhibit-video-shot .play-button svg {
+        width: 10px;
+        height: 10px;
+    }
+
+    /* The counter is the other signal that a piece has more than one view. */
+    .exhibit-count {
+        font-size: 0.52rem;
+        padding: 2px 6px;
+        right: 6px;
+        top: 6px;
+    }
+
+    .exhibit-tag {
+        font-size: 0.55rem;
+        padding: 2px 7px;
+        left: 6px;
+        bottom: 6px;
+    }
+
+    /* The arrows are a desktop affordance. On a 169px photograph two 28px
+       discs cover a third of the frame, and there is nothing for them to do
+       that the swipe, the dots, the counter and the thumbnails beside the
+       name do not already do. */
+    .exhibit-nav {
+        display: none;
+    }
+}
+
+/* ─── The Eclipse: process notes on a phone ─── */
+/* Nine notes in one column ran to 1,800px, the tallest thing on the page once
+   the index was compacted. Two columns, each note clipped to a few lines with
+   its own "more", brings it to a third of that while leaving every word
+   reachable. The button is hidden by the script wherever the note fits. */
+.making-more {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .making-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 16px;
+    }
+
+    .making-item {
+        padding: 12px 0;
+    }
+
+    .making-item dt {
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
+    }
+
+    .making-item dd {
+        font-size: 0.78rem;
+        line-height: 1.6;
+        margin-top: 5px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+    }
+
+    .making-item.is-open dd {
+        -webkit-line-clamp: unset;
+        overflow: visible;
+    }
+
+    .making-more {
+        display: inline-block;
+        margin-top: 5px;
+        padding: 0;
+        border: none;
+        background: none;
+        color: #fbbf24;
+        font-family: 'Chelsea Market', Arial, sans-serif;
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+    }
+
+    .making-more[hidden] {
+        display: none;
+    }
 }

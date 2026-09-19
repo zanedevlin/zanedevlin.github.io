@@ -1,0 +1,78 @@
+---
+import ArtDesignLayout from '../../Layouts/ArtDesignLayout.astro';
+const pageTitle = "Italy";
+const pageDescription = "Printmaking and screen printed textiles made by Zane Devlin during a semester in Rome.";
+---
+
+<ArtDesignLayout pageTitle={pageTitle} pageDescription={pageDescription} hideHeaderBack>
+  <div class="art-design-page">
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">Italy</div>
+    </div>
+
+    <!-- The intro band and the album tiles share .projects-section's
+         width, so they line up on the same edges and the same 40px
+         rhythm. The band's photograph belongs to neither album: it sets
+         the scene and hands the visitor on to the collections. -->
+    <div class="projects-section">
+
+      <div class="intro-band">
+        <figure class="intro-band-photo">
+          <img src="/italy-display.jpg" alt="The work laid out at the end of the semester: the printed garment on a dress form, the screens behind it, sketchbook and printed cloth" />
+        </figure>
+        <div class="intro-band-copy">
+          <p>Printmaking and screen printed textiles, made during a semester studying in Rome. The prints are mostly one image, worked through many versions toward a poster for the short film <a class="project-link" href="/art-design/posters?open=Make%20Keeley%20JUMP.">Make Keeley JUMP.</a>. The textiles are a repeating pattern, screen printed onto lengths of fabric and pinned into garments.</p>
+          <p>That same pattern was printed a year later on the balaclavas of <a class="project-link" href="/art-design/the-eclipse">The Eclipse</a>, my senior comprehensive project or capstone at Allegheny College.</p>
+        </div>
+      </div>
+
+      <div class="projects-grid">
+
+        <a href="/art-design/italy/printmaking" class="project-card">
+          <div class="project-image">
+            <img src="/italy-print-08.jpg" class="cover--top" alt="Screen, stencil and mono relief print, Rome" loading="lazy" decoding="async" />
+            <div class="album-badge">
+              <svg class="album-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="7" width="14" height="14" rx="2"/>
+                <path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/>
+              </svg>
+              17 photos
+            </div>
+            <div class="project-overlay"><span class="overlay-view">View Album</span></div>
+          </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-type">Printmaking</span>
+              <span class="project-date">Fall 2024</span>
+            </div>
+            <h3>Printmaking</h3>
+          </div>
+        </a>
+
+        <a href="/art-design/italy/textiles" class="project-card">
+          <div class="project-image">
+            <img src="/italy-textile-1-front.jpg" alt="Screen printed textile, Rome" loading="lazy" decoding="async" />
+            <div class="album-badge">
+              <svg class="album-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="7" width="14" height="14" rx="2"/>
+                <path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/>
+              </svg>
+              19 photos
+            </div>
+            <div class="project-overlay"><span class="overlay-view">View Album</span></div>
+          </div>
+          <div class="project-content">
+            <div class="project-meta">
+              <span class="project-type">Textiles</span>
+              <span class="project-date">Fall 2024</span>
+            </div>
+            <h3>Textiles</h3>
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+</ArtDesignLayout>

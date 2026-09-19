@@ -112,7 +112,7 @@ const videos = [
   },
   {
     title: "The Space",
-    description: "Zane's first feature film, written, directed, acted, and produced during his gap year between high school and Allegheny College. The unofficial (official) sequel to 'The Backflip,' this mockumentary follows an exaggerated caricature of Zane determined to go to space — a witty commentary on passion, drive, and the willpower to do what you love.",
+    description: "Zane's first feature film, written, directed, acted, and produced during his gap year between high school and Allegheny College. The unofficial (official) sequel to 'The Backflip,' this mockumentary follows an exaggerated caricature of Zane determined to go to space, a witty commentary on passion, drive, and the willpower to do what you love.",
     thumbnail: "/video-thumb-space.jpg",
     category: "Personal",
     // Like The Backflip and GoWalkabout Gowanus above, this breaks out into

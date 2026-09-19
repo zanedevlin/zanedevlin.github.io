@@ -1,0 +1,56 @@
+---
+import ArtDesignLayout from '../../Layouts/ArtDesignLayout.astro';
+import ProjectSlider from '../../components/ProjectSlider.jsx';
+
+/* The installation shot leads at double width: it is the only photograph
+   that shows all three parts of the piece at once, and the helmet on its
+   own does not explain that the sketchbook and the screen were part of
+   what was exhibited.
+
+   Captions only where there is something factual to say about the
+   particular photograph. Several of these are another angle on the same
+   object, and an invented line under them would be worse than none. */
+const images = [
+  { src: "/eclipse-helmet-04.jpg", feature: true, caption: "The installation as it was shown: the helmet on a pedestal, the workbench table carrying the sketchbook and the tools, and a monitor looping the progression from the head scan to the finished model." },
+  { src: "/eclipse-helmet-01.jpg", caption: "The finished helmet, on a 3D printed cast of my own head." },
+  { src: "/eclipse-helmet-02.jpg", caption: "On its pedestal in the gallery." },
+  "/eclipse-helmet-03.jpg",
+  { src: "/eclipse-helmet-06.jpg", caption: "A replica Daredevil helmet, welded together from two failed prints and repainted in my own color scheme. The Netflix series was the reference for the eyepiece, and the replica was built to have the thing itself on the table next to the design it fed." },
+  { src: "/eclipse-helmet-05.jpg", caption: "The workbench table, with the sketchbook, the cutting mat and the Daredevil replica." },
+  { src: "/eclipse-helmet-07.jpg", caption: "Sketchbook, kept open in the installation. The design began on paper, cycling through silhouettes and proportions before any of it went into Blender." },
+  "/eclipse-helmet-08.jpg",
+  "/eclipse-helmet-09.jpg",
+  { src: "/eclipse-helmet-10.jpg", caption: "Opening night." },
+];
+---
+
+<ArtDesignLayout
+  backUrl="/art-design"
+  pageTitle="The Fireman Project"
+  pageDescription="The Fireman Project: a wearable helmet designed and 3D printed by Zane Devlin for his junior art seminar, the first build toward The Eclipse, his senior comprehensive project or capstone at Allegheny College."
+  hideHeaderBack
+>
+  <div class="project-page">
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">The Fireman Project</div>
+    </div>
+    <ProjectSlider slides={images} album client:load />
+    <div class="project-page-body">
+      <div class="project-meta">
+        <span class="project-type">Prop / Costume Fabrication</span>
+        <span class="project-date">Spring 2025</span>
+      </div>
+
+      <p class="project-page-description">A wearable helmet for an original superhero character, made for my junior art seminar under Professor Heather Brand. It was the first object I built for this character, and the design was later redrawn and rebuilt as the master helmet of <a class="project-link" href="/art-design/the-eclipse">The Eclipse</a>, my senior comprehensive project or capstone at Allegheny College.</p>
+
+      <p class="project-page-description">It started with my own head. A friend photographed it from every angle in a well-lit room, hundreds of frames, and the photogrammetry apps I was testing sent those up to be triangulated into a mesh. I tried several to see which handled facial structure best, how much the lighting mattered, and how badly hair interfered. Borrowing a swim cap to flatten my hair improved the scan more than anything else I changed. The scan was only ever meant as a base to design on top of, and it was some way into the project before I realized I could print the head itself and have a physical version to work against.</p>
+
+      <p class="project-page-description">The design began on paper, working through silhouettes and proportions until I had one I was willing to commit to. Moving it into Blender was the hardest part of the project. I had never used the program, and Keven Duverglas, a peer I had worked with in my freshman year, taught me the foundations: how to bring the sketches in, how to trace a complex form out in sections, and how to build the shape at low resolution first so it stayed controllable. The helmet was printed in sections in PLA, with ABS, PETG and laser cut wood used elsewhere in the build, then sanded and assembled by hand.</p>
+
+      <p class="project-page-description">The eyepiece came out of the Netflix Daredevil series, and Stephanie Maslansky's costume design for it, where the eye openings are shaped to read as emotion and threat at the same time. It is the one part of this helmet that carried into the senior project unchanged, because the shape already worked. The replica Daredevil helmet in the installation was welded together from two failed prints and repainted, so the reference sat on the table beside the thing it had fed.</p>
+
+      <p class="project-page-description">It was exhibited with the sketchbook open on a workbench table and a monitor looping the progression from the head scan through to the finished model, so the process stayed visible alongside the object. The printed head from this project went on to become part of the senior installation, where every helmet is displayed on a cast taken from it.</p>
+    </div>
+  </div>
+</ArtDesignLayout>

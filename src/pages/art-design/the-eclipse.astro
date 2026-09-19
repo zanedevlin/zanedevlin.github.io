@@ -1,0 +1,272 @@
+---
+import ArtDesignLayout from '../../Layouts/ArtDesignLayout.astro';
+import ProjectSlider from '../../components/ProjectSlider.jsx';
+import ExhibitionIndex from '../../components/ExhibitionIndex.jsx';
+import CompReader from '../../components/CompReader.jsx';
+
+/* The eight pieces, in the order they are numbered on their own plaques.
+   The numerals, names and subtitles here are transcribed from the plaques
+   in the photographs - nothing about the sequence is invented.
+
+   That order also happens to be the room's own: I-IV stood along the
+   fireplace, V-VIII along the bar opposite, which is why the index below
+   splits cleanly into two columns. The order within each column is set
+   further down. */
+const pieces = [
+  {
+    numeral: "I",
+    name: "Origin",
+    subtitle: "Prologue",
+    note: "Before Elias has a suit of his own he goes out in pieces of his friend Sam's lacrosse gear. It stands on its own plant stand, apart from the fireplace grouping, so it reads as something earlier and smaller than the story that follows.",
+    photo: "/the-eclipse-01-origin.avif",
+    alts: [{ src: "/the-eclipse-01-origin-b.avif", label: "Angle" }],
+    plaque: "/the-eclipse-01-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-01-plaque.avif",
+  },
+  {
+    numeral: "II",
+    name: "The Phoenix",
+    subtitle: "The beginning",
+    note: "The uneclipsed sun: Elias's inherited image of what a hero looks like. This is the printed master helmet itself, sanded smooth and painted. Penumbra and Totality were cast from its mold.",
+    photo: "/the-eclipse-02-phoenix.avif",
+    alts: [
+      { src: "/the-eclipse-02-phoenix-b.avif", label: "Profile" },
+      { src: "/the-eclipse-02-phoenix-c.avif", label: "Reverse" },
+    ],
+    plaque: "/the-eclipse-02-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-02-plaque.avif",
+  },
+  {
+    numeral: "III",
+    name: "Penumbra",
+    subtitle: "The middle",
+    note: "The partial shadow, where the character still resembles himself but something has started to fall across him.",
+    photo: "/the-eclipse-03-penumbra.avif",
+    plaque: "/the-eclipse-03-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-03-plaque.avif",
+  },
+  {
+    numeral: "IV",
+    name: "Totality",
+    subtitle: "The end",
+    note: "Full occlusion: the moment the original light source is gone and only the outline remains.",
+    photo: "/the-eclipse-04-totality.avif",
+    plaque: "/the-eclipse-04-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-04-plaque.avif",
+  },
+  {
+    numeral: "V",
+    name: "The Phoenix",
+    subtitle: "Stunt Double",
+    note: "Foam rather than resin, and paneled rather than cast. The doubles sit along the bar mirroring their narrative counterparts, which puts the production logic behind the objects out in the open.",
+    photo: "/the-eclipse-05-phoenix-sd.avif",
+    plaque: "/the-eclipse-05-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-05-plaque.avif",
+  },
+  {
+    numeral: "VI",
+    name: "Penumbra",
+    subtitle: "Stunt Double",
+    note: "Built after Tubthumping, and faster for it. Rather than gluing a second layer of panels on top, the panel edges are laser-etched as shallow lines, which reads the same from any normal distance.",
+    photo: "/the-eclipse-06-penumbra-sd.avif",
+    plaque: "/the-eclipse-06-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-06-plaque.avif",
+  },
+  {
+    numeral: "VII",
+    name: "Totality",
+    subtitle: "Stunt Double",
+    note: "The only foam helmet never painted. It was left black from the Plasti-Dip stage, because that flat black matched the character's final state better than anything that could go over it.",
+    photo: "/the-eclipse-07-totality-sd.avif",
+    alts: [
+      { src: "/the-eclipse-07-totality-sd-b.avif", label: "Profile" },
+      { src: "/the-eclipse-07-totality-sd-c.avif", label: "Reverse" },
+    ],
+    plaque: "/the-eclipse-07-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-07-plaque.avif",
+  },
+  {
+    numeral: "VIII",
+    name: "Tubthumping",
+    subtitle: "Music Video",
+    note: "Worn by Saul Mesa in the Tubthumping music video, which plays on the CRT. It was the first foam build and the only one with a second layer of 2 mm panels glued on top for a raised look.",
+    photo: "/the-eclipse-08-tubthumping.avif",
+    alts: [{ src: "/the-eclipse-08-crt.avif", label: "On the CRT" }],
+    video: {
+      id: "PaPgR2zqfUc",
+      thumb: "/video-thumb-tubthumping.jpg",
+      href: "/filmmaking?category=Personal",
+      label: "Chumbawamba, Tubthumping",
+    },
+    plaque: "/the-eclipse-08-plaque-strip.avif",
+    plaqueFull: "/the-eclipse-08-plaque.avif",
+  },
+];
+
+/* The index in two columns, laid out as the room was: the casts along the
+   fireplace on the left, the foam doubles along the bar on the right.
+
+   The right-hand column is deliberately not in plaque order. Lifting
+   Tubthumping (VIII) to the top puts every stunt double directly opposite
+   the helmet it doubles for - Phoenix beside Phoenix, Penumbra beside
+   Penumbra, Totality beside Totality - which is both the point of the
+   doubles and how the two sides of the room actually faced each other. It
+   also pairs the two pieces that sit outside the three-phase sequence and
+   stood apart from the rows on their own stands: the prologue and the music
+   video. The cost is that the numerals read VIII, V, VI, VII down that
+   column, so the heading below says why. */
+const by = (numeral) => pieces.find((piece) => piece.numeral === numeral);
+
+const sides = [
+  {
+    title: "The fireplace side",
+    note: "Origin on its own stand, then the three narrative helmets along the fireplace.",
+    pieces: ["I", "II", "III", "IV"].map(by),
+  },
+  {
+    title: "The bar side",
+    note: "Each foam double sits opposite the cast it stands in for. Tubthumping, like Origin, stood apart from the row on its own.",
+    pieces: ["VIII", "V", "VI", "VII"].map(by),
+  },
+];
+
+/* The album is the room itself, in the order a visitor walks it: the two
+   wide views, the pieces as groups, then the furniture, the costume, and
+   the objects on the tables. The individual pieces and their plaques are
+   not repeated here - each one is already in the index above, beside its
+   own plaque and its own other angles, which is where a visitor should
+   meet it. What is left is everything the index cannot show: the room. */
+const album = [
+  { src: "/the-eclipse-room-fireplace.avif", caption: "The fireplace side. Origin stands apart on its plant stand at the left; the three narrative helmets sit along the fireplace; the CRT is at the right." },
+  { src: "/the-eclipse-room-bar.avif", caption: "The bar side, built from plywood to match the fireplace unit opposite it." },
+  { src: "/the-eclipse-heroes.avif", caption: "Phoenix, Penumbra and Totality along the fireplace. Read in sequence, the titles trace the same arc as the character." },
+  "/the-eclipse-heroes-angle.avif",
+  { src: "/the-eclipse-doubles-three.avif", caption: "The three foam stunt doubles. Totality, on the right, is the only one that was never painted." },
+  { src: "/the-eclipse-bar-four.avif", caption: "The four foam helmets on the bar: the three stunt doubles and the Tubthumping helmet among them." },
+  { src: "/the-eclipse-08-crt.avif", caption: "The CRT between the fireplace and the bar, playing the Tubthumping music video." },
+  { src: "/the-eclipse-chair.avif", caption: "The leather chair, the side table and the wooden atlas. The furniture is domestic on purpose: a gloss or industrial finish would have read as gallery hardware." },
+  { src: "/the-eclipse-costume.avif", caption: "A suitcase beside the chair with the music video costume half visible inside it, as though it had just been opened or was about to be packed away." },
+  { src: "/the-eclipse-side-table.avif", caption: "The side table, with an iPod and headphones. The story runs on early-2000s music." },
+  { src: "/the-eclipse-pen-holder.avif", caption: "The pen holder on the side table, engraved “God Answers Prayer”." },
+  { src: "/the-eclipse-graduation.avif", caption: "The framed graduation photo, photoshopped to read “03” to hold the story in the early 2000s." },
+  { src: "/the-eclipse-bar-clock.avif", caption: "The back of the bar, with the clock." },
+  { src: "/the-eclipse-title-wall.jpg", caption: "The title wall. The Eclipse was shown alongside work by three classmates." },
+];
+
+/* Process notes: what each part of a helmet actually is. Kept as a list
+   rather than a paragraph because that is how it is read - nobody wants
+   this as prose, and as a list it stays out of the way of the photographs. */
+const making = [
+  ["Master", "3D printed in two halves, a front and a back, at the ALIC facility at Bessemer. It came off the machine covered in layer lines, so it was built up in coats of Rustoleum sandable filler primer and sanded between every coat until the surface was completely smooth."],
+  ["Molds", "Each half got its own silicone mold: a block pour for the back, brush-on silicone with registration keys and a plaster mother mold for the front. Penumbra and Totality were both cast from them in Onyx Fast, a fast-curing Smooth-On resin."],
+  ["Stunt doubles", "Not cast but paneled. The master was taped up and every panel outlined on the tape, then the tape panels were cut off and flattened onto paper, scanned, redrawn in Illustrator as laser-cut files, and cut from 5 mm EVA foam."],
+  ["Nose pieces", "3D printed, coated in Epsilon Pro to take out the layer lines, sanded smooth and sprayed high-gloss black. Once that had set, a second thin coat went on and chrome nail powder was applied while it was still tacky, which leaves a surface that reads as worked copper."],
+  ["Eyepiece", "Carried over unchanged from the junior seminar prototype. The shape comes from the Netflix Daredevil mask, built so the eye openings read as emotion and threat at once. Cast in Smooth-Cast 57D, a flexible resin, then coated in black Plasti-Dip for a matte surface close to leather."],
+  ["Heads", "Every helmet sits on a cast of my own head, from a photogrammetry scan made with a phone during my junior seminar. The display heads are poured in pottery plaster, and a jig gave each one a two-inch dowel at the same angle so the row reads as a series rather than a collection."],
+  ["Balaclavas", "The pattern is a feather-and-scale design I developed in Rome, exposed onto a silk screen and printed in plastisol with a stretch additive onto milliskin matte spandex. The balaclavas themselves were drafted on a dress form and sewn on a topstitch machine."],
+  ["Bases", "Plywood circles cut on a bandsaw, cleaned up on a belt sander, beveled with a router and finished in a water-based stain and sealer so they read as furniture rather than display hardware. All eight are thirteen inches across, and six of them carry a second six-inch layer underneath that gives the base more depth."],
+  ["Plaques", "Copper-anodized aluminum, which etches silver and would have been unreadable. Instead the whole sheet was sprayed high-gloss black and the laser burned the paint off everything except the lettering, so the copper reads as the field and the text stays black."],
+];
+
+/* The written comp itself, served alongside the photographs. Every piece note,
+   caption and process line on this page is taken from it. It opens in a reader
+   rather than downloading - see CompReader.jsx. Setting this to null simply
+   drops the button, so the page never ships a link that 404s. */
+const compDoc = "/the-eclipse-comp.pdf";
+
+const pageTitle = "The Eclipse";
+const pageDescription = "The Eclipse. Zane Devlin's senior comprehensive project or capstone at Allegheny College: an eight-piece installation of helmets and props staged as a room in a home, built around a story about the collapse of a hero.";
+---
+
+<ArtDesignLayout pageTitle={pageTitle} pageDescription={pageDescription} hideHeaderBack>
+  <div class="project-page eclipse-page">
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">The Eclipse</div>
+    </div>
+
+    <div class="projects-section">
+
+      <!-- Same intro band as the Italy landing page, so this reads as part
+           of the same site even though everything below it is new. -->
+      <div class="intro-band">
+        <figure class="intro-band-photo">
+          <img src="/the-eclipse-room-wide.avif" alt="The Eclipse installed: the fireplace with three cast helmets on the left, a CRT television in the middle, the bar with the foam stunt doubles on the right, and a leather chair and armillary sphere in front" />
+        </figure>
+        <div class="intro-band-copy">
+          <div class="project-meta">
+            <span class="project-type">Narrative Sculpture / Installation</span>
+            <span class="project-date">Spring 2026</span>
+          </div>
+          <p>My senior comprehensive project or capstone at Allegheny College. The Eclipse is set in 2004, in a version of America where superheroes are ordinary. The hero an entire generation grew up on is killed on live television, and an eighteen-year-old named Elias hears her last words as an instruction. The story follows what that conviction costs him.</p>
+          <p>Inside the gallery the eight pieces are staged as a room in a home, with a fireplace, a bar, a leather chair and a CRT television. Not a gallery display, not a workshop, not a display case. A room, so the helmets read not as a hero's trophies but as the private records of someone whose belief system collapsed. The three narrative helmets are named for the phases of a solar eclipse, and each has a foam stunt double built alongside it, the way a film production would.</p>
+          <p>Shown in The Four Horsemen, a four-person senior comprehensive exhibition.</p>
+        </div>
+      </div>
+
+      <section class="eclipse-section">
+        <div class="eclipse-section-head eclipse-section-head--split">
+          <div class="eclipse-section-head-text">
+            <h2>Exhibition index</h2>
+            <p>Eight pieces, numbered as they are on their own plaques and laid out as the room was: the narrative helmets along the fireplace on the left, their foam stunt doubles along the bar on the right, each one opposite the helmet it doubles for. A piece photographed from more than one angle turns in place; click a photograph for a closer look.</p>
+          </div>
+          {compDoc && <CompReader doc={compDoc} pages={72} client:load />}
+        </div>
+        <ExhibitionIndex sides={sides} client:load />
+      </section>
+
+      <section class="eclipse-section">
+        <div class="eclipse-section-head">
+          <h2>How it was made</h2>
+        </div>
+        <dl class="making-grid">
+          {making.map(([term, desc]) => (
+            <div class="making-item">
+              <dt>{term}</dt>
+              <dd>{desc}</dd>
+              {/* Only rendered where the note is actually clipped - the script
+                  below removes it again on a screen wide enough to show the
+                  whole thing, so no one is offered a "more" that does nothing. */}
+              <button type="button" class="making-more" aria-expanded="false">more…</button>
+            </div>
+          ))}
+        </dl>
+        <script is:inline>
+          (() => {
+            const items = document.querySelectorAll('.making-item');
+            const sync = () => items.forEach((item) => {
+              const dd = item.querySelector('dd');
+              const btn = item.querySelector('.making-more');
+              if (!dd || !btn) return;
+              // Clipped only if the text is taller than the box the clamp gives
+              // it. Measured with the item closed, so an open one is left be.
+              const clipped = !item.classList.contains('is-open') && dd.scrollHeight - dd.clientHeight > 2;
+              btn.hidden = !clipped && !item.classList.contains('is-open');
+            });
+            items.forEach((item) => {
+              const btn = item.querySelector('.making-more');
+              if (!btn) return;
+              btn.addEventListener('click', () => {
+                const open = item.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', String(open));
+                btn.textContent = open ? 'less' : 'more…';
+              });
+            });
+            sync();
+            window.addEventListener('resize', sync);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+          })();
+        </script>
+      </section>
+
+      <section class="eclipse-section eclipse-section--album">
+        <div class="eclipse-section-head">
+          <h2>The room</h2>
+          <p>The installation itself, in the order it is walked. The pieces are in the index above.</p>
+        </div>
+      </section>
+    </div>
+
+    <ProjectSlider slides={album} album albumOpensViewer client:load />
+  </div>
+</ArtDesignLayout>
