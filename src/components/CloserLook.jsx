@@ -45,7 +45,7 @@ export const CloserLookButton = ({ onOpen, className = "" }) => (
     </button>
 );
 
-const CloserLook = ({ src, alt = "", caption, onClose, onNavigate }) => {
+const CloserLook = ({ src, alt = "", caption, counter, onClose, onNavigate }) => {
     const [scale, setScale] = useState(1);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [panning, setPanning] = useState(false);
@@ -229,6 +229,15 @@ const CloserLook = ({ src, alt = "", caption, onClose, onNavigate }) => {
             if (gesture.current?.kind === "drag" && !gesture.current.moved) {
                 if (stateRef.current.scale > MIN_SCALE) reset();
                 else zoomAbout(CLICK_ZOOM, e.clientX, e.clientY);
+            } else if (
+                // Not zoomed in, so a sideways drag has nothing to pan: read
+                // it as a swipe to the next or previous photo instead.
+                gesture.current?.kind === "drag" && onNavigate &&
+                stateRef.current.scale <= MIN_SCALE
+            ) {
+                const dx = e.clientX - gesture.current.startX;
+                const dy = e.clientY - gesture.current.startY;
+                if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) onNavigate(dx < 0 ? 1 : -1);
             }
             gesture.current = null;
         }
@@ -270,6 +279,8 @@ const CloserLook = ({ src, alt = "", caption, onClose, onNavigate }) => {
                 onPointerUp={endPointer}
                 onPointerCancel={endPointer}
             />
+
+            {counter && <p className="closer-look-counter">{counter}</p>}
 
             {onNavigate && (
                 <>

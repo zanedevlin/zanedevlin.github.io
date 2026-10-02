@@ -28,6 +28,13 @@ import CloserLook, { CloserLookButton } from "./CloserLook.jsx";
  * inside the viewer still walk the whole album. It is opt-in because an album
  * holding two-sided pieces needs the carousel: the flip lives on the slide,
  * and the viewer has no way to turn a piece over.
+ *
+ * justified: lays the album out in rows that each read left to right at one
+ * shared height, instead of the staggered masonry. Every slide must carry its
+ * own ratio (width / height), e.g. { src: "/a.jpg", ratio: 1.5 }, so the rows
+ * can be built before the photos load. Meant for a long album shown in a set
+ * order (Photography), where the masonry's staggered columns made the order
+ * impossible to follow.
  */
 const isFlipSlide = (slide) => typeof slide === "object" && slide !== null && slide.back;
 const slideSrc = (slide) => {
@@ -37,7 +44,18 @@ const slideSrc = (slide) => {
 const slideCaption = (slide) =>
     (typeof slide === "object" && slide !== null ? slide.caption : undefined);
 
-const ProjectSlider = ({ slides, album = false, albumOpensViewer = false }) => {
+// The album grid can show a lighter stand-in for a photo ({ thumb: "/a.jpg" }),
+// e.g. an SDR copy of an HDR photo; the carousel and viewer always use src.
+const slideThumb = (slide) =>
+    (typeof slide === "object" && slide !== null && slide.thumb) || slideSrc(slide);
+const slideRatio = (slide) =>
+    (typeof slide === "object" && slide !== null && slide.ratio) || 1;
+
+// Past this many slides a row of dots stops reading as a position and turns
+// into noise, so the carousel shows a progress bar instead.
+const MAX_DOTS = 15;
+
+const ProjectSlider = ({ slides, album = false, albumOpensViewer = false, justified = false }) => {
     const [viewMode, setViewMode] = useState(album ? "grid" : "carousel");
 
     // ── Infinite carousel ────────────────────────────────────────────
@@ -188,7 +206,7 @@ const ProjectSlider = ({ slides, album = false, albumOpensViewer = false }) => {
     const gridRef = useRef(null);
 
     useEffect(() => {
-        if (viewMode !== "grid") return;
+        if (viewMode !== "grid" || justified) return;
         const grid = gridRef.current;
         if (!grid) return;
 
@@ -233,6 +251,36 @@ const ProjectSlider = ({ slides, album = false, albumOpensViewer = false }) => {
     // the index rather than a URL is what lets the arrow keys walk the
     // carousel from inside the viewer.
     const [closerLook, setCloserLook] = useState(null);
+
+    // Closing the viewer from the album grid leaves the visitor on the photo
+    // they were last looking at - which may be far from the one they first
+    // clicked, after walking the album with the arrows. That thumbnail is
+    // scrolled into view if needed and outlined for a moment.
+    const [lastViewed, setLastViewed] = useState(null);
+
+    // Read through a ref: the viewer attaches its Escape listener once, so
+    // it keeps calling the close handler from the render it opened in -
+    // which would otherwise report the first photo, not the last one seen.
+    const closerLookRef = useRef(null);
+    closerLookRef.current = closerLook;
+
+    const closeAlbumViewer = () => {
+        setLastViewed(closerLookRef.current);
+        setCloserLook(null);
+    };
+
+    useEffect(() => {
+        if (lastViewed === null || viewMode !== "grid") return;
+        const thumb = gridRef.current && gridRef.current.querySelectorAll(".album-thumb")[lastViewed];
+        if (!thumb) return;
+        const r = thumb.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) {
+            thumb.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        thumb.focus({ preventScroll: true });
+        const t = setTimeout(() => setLastViewed(null), 2200);
+        return () => clearTimeout(t);
+    }, [lastViewed, viewMode]);
 
     // For a two-sided piece this follows whichever face is showing.
     const faceOf = (index) => {
@@ -377,19 +425,20 @@ const ProjectSlider = ({ slides, album = false, albumOpensViewer = false }) => {
                 <div className="album-view-head">
                     <span className="album-view-count">{photoCount} photos</span>
                 </div>
-                <div className="album-grid" ref={gridRef}>
+                <div className={justified ? "album-rows" : "album-grid"} ref={gridRef}>
                     {slides.map((slide, index) => (
                         <button
                             key={index}
                             type="button"
-                            className={`album-thumb${isFeature(slide) ? " album-thumb--feature" : ""}`}
+                            className={`album-thumb${isFeature(slide) ? " album-thumb--feature" : ""}${lastViewed === index ? " album-thumb--last" : ""}`}
+                            style={justified ? { "--r": slideRatio(slide) } : undefined}
                             onClick={() => (albumOpensViewer ? setCloserLook(index) : openAt(index))}
                             aria-label={albumOpensViewer
                                 ? `Take a closer look at photo ${index + 1} of ${count}`
                                 : `Open item ${index + 1} of ${count}`}
                         >
                             <img
-                                src={slideSrc(slide)}
+                                src={slideThumb(slide)}
                                 alt={slideCaption(slide) || `Photo ${index + 1}`}
                                 title={slideCaption(slide)}
                                 loading="lazy"
@@ -409,8 +458,9 @@ const ProjectSlider = ({ slides, album = false, albumOpensViewer = false }) => {
                         src={faceOf(closerLook).src}
                         alt={faceOf(closerLook).alt}
                         caption={faceOf(closerLook).caption}
+                        counter={count > 1 ? `${closerLook + 1} / ${count}` : undefined}
                         onNavigate={count > 1 ? navigateCloserLook : undefined}
-                        onClose={() => setCloserLook(null)}
+                        onClose={closeAlbumViewer}
                     />
                 )}
             </div>
@@ -538,7 +588,29 @@ const ProjectSlider = ({ slides, album = false, albumOpensViewer = false }) => {
                 <p className="slide-caption">{slideCaption(slides[currentIndex])}</p>
             )}
 
-            {count > 1 && (
+            {count > MAX_DOTS && (
+                <div
+                    className="slide-progress"
+                    role="slider"
+                    aria-label="Photo"
+                    aria-valuemin={1}
+                    aria-valuemax={count}
+                    aria-valuenow={currentIndex + 1}
+                    tabIndex={-1}
+                    onClick={(e) => {
+                        const r = e.currentTarget.getBoundingClientRect();
+                        const f = (e.clientX - r.left) / r.width;
+                        goTo(Math.min(count - 1, Math.max(0, Math.floor(f * count))));
+                    }}
+                >
+                    <div
+                        className="slide-progress-fill"
+                        style={{ width: `${((currentIndex + 1) / count) * 100}%` }}
+                    />
+                </div>
+            )}
+
+            {count > 1 && count <= MAX_DOTS && (
                 <div className="slide-dots">
                     {slides.map((_, index) => (
                         <button

@@ -1,0 +1,51 @@
+---
+import ArtDesignLayout from '../../Layouts/ArtDesignLayout.astro';
+const pageTitle = "Comic Con";
+const pageDescription = "Costumes Zane Devlin built each year for New York Comic Con, from 2014 to 2021.";
+
+/* Newest first, like the rest of the site. Photos are not in yet, so every
+   tile is a placeholder. Once a year has photos, swap its <div> for an
+   <a href="/art-design/comic-con/YEAR"> like the Italy tiles. 2020 is
+   missing because the convention was canceled. */
+const costumes = [
+  { year: "2021", title: "Marty McFly and Iron Man", detail: "Two earlier costumes, slightly updated" },
+  { year: "2019", title: "Iron Man", detail: "Avengers: Infinity War, with the Infinity Gauntlet" },
+  { year: "2018", title: "Quicksilver", detail: "X-Men: Apocalypse" },
+  { year: "2017", title: "Daredevil", detail: "Netflix series" },
+  { year: "2016", title: "Marty McFly", detail: "Back to the Future Part II" },
+  { year: "2015", title: "Rocket Raccoon", detail: "In a suit, with a friend in a matching suit as Groot" },
+  { year: "2014", title: "Spider-Man", detail: "The first one" },
+];
+---
+
+<ArtDesignLayout pageTitle={pageTitle} pageDescription={pageDescription} hideHeaderBack>
+  <div class="art-design-page">
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">Comic Con</div>
+    </div>
+
+    <div class="projects-section">
+
+      <p class="project-page-description">Every year I built a costume for New York Comic Con, which falls in early October. Starting in the summer left time to finish by the convention, and the costume doubled as my Halloween costume. The convention was canceled in 2020, and in 2021 I went on short notice in two earlier costumes with a few updates.</p>
+
+      <div class="projects-grid">
+        {costumes.map((c) => (
+          <div class="project-card project-card--placeholder">
+            <div class="project-image">
+              <div class="thumbnail-placeholder">Photos coming soon</div>
+            </div>
+            <div class="project-content">
+              <div class="project-meta">
+                <span class="project-type">{c.detail}</span>
+                <span class="project-date">{c.year}</span>
+              </div>
+              <h3>{c.title}</h3>
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  </div>
+</ArtDesignLayout>

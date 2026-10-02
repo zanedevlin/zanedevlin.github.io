@@ -8,7 +8,12 @@ import CloserLook, { CloserLookButton } from "./CloserLook.jsx";
 // ─────────────────────────────────────────────────────────────────────────────
 // Ordered to match the filmmaking page's chronological/reference order.
 const slides = [
+  { src: "/poster-aftv-student-film-night.jpg", from: "AFTV Student Film Night" },
+  { src: "/poster-ernst-trail-1.jpg", from: "Ernst Trail", link: "https://www.youtube.com/watch?v=vmqRLrltVJE" },
+  { src: "/poster-ernst-trail-2.jpg", from: "Ernst Trail", link: "https://www.youtube.com/watch?v=vmqRLrltVJE" },
+  { src: "/poster-ernst-trail-3.jpg", from: "Ernst Trail", link: "https://www.youtube.com/watch?v=vmqRLrltVJE" },
   { src: "/poster-make-keeley-jump.jpg", from: "Make Keeley JUMP.", link: "/filmmaking" },
+  { src: "/poster-adaptation-screening.jpg", from: "Adaptation Screening (Amore Mio)", link: "/filmmaking?category=Collaborations" },
   { src: "/poster-chicken-sandwich.jpg", from: "Chicken Sandwich", link: "/filmmaking" },
   { src: "/poster-vigilante.jpg", from: "VIGILANTE", link: "/filmmaking" },
   { src: "/poster-teenage-wasteland-1.jpg", from: "Teenage Wasteland", link: "/filmmaking" },
@@ -24,6 +29,15 @@ const slides = [
   { src: "/poster-game-over.jpg", from: "GAME OVER", link: "/filmmaking" },
   { src: "/poster-vukovich-night-guard.jpg", from: "Vukovich Night Guard", link: "/filmmaking" },
   { src: "/poster-the-space.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-2.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-7.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-3.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-4.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-5.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-6.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-8.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-9.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
+  { src: "/poster-the-space-10.jpg", from: "The Space", link: "/filmmaking?open=The%20Space" },
 ];
 
 // Gap left between the poster's actual edge and the arrow/close buttons in
@@ -430,7 +444,11 @@ const PostersSlider = () => {
       <div className="poster-caption">
         <span className="poster-caption-label">From:</span>
         {current.link
-          ? <a href={current.link} className="poster-caption-link">{current.from}</a>
+          ? <a
+              href={current.link}
+              className="poster-caption-link"
+              {...(/^https?:/.test(current.link) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >{current.from}</a>
           : <span className="poster-caption-text">{current.from}</span>
         }
         <span className="poster-counter">{currentIndex + 1} / {slides.length}</span>

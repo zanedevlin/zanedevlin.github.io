@@ -1,0 +1,108 @@
+---
+import ArtDesignLayout from '../../Layouts/ArtDesignLayout.astro';
+import ProjectSlider from '../../components/ProjectSlider.jsx';
+
+/* My best photographs, newest first, in groups: the summer of 2025, the
+   semester abroad, summer in NYC, Clinton, Connecticut, and last the
+   oldest set (the winter shoots). The order was set by hand -
+   re-sorting by the capture dates in the files would scramble it, so don't sort by
+   them. No captions: the photos stand on their own.
+   The AVIFs are HDR exports, kept in HDR like the rest of the site - but
+   only in the viewer. In the album grid each one shows its -thumb.jpg, a
+   plain SDR copy, so no photo glows brighter than its neighbours and pulls
+   the eye before anyone has chosen to open it.
+   ratio (width / height) lets the album lay each row out at one height
+   without waiting for the photos to load - see `justified` in
+   ProjectSlider.jsx. */
+const images = [
+  { src: "/photography-img-1833.jpg", ratio: 1.7783 },
+  { src: "/photography-idg-20250819-104925-655.jpg", ratio: 0.7500 },
+  { src: "/photography-idg-20250819-150337-542.avif", thumb: "/photography-idg-20250819-150337-542-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-6359.avif", thumb: "/photography-img-6359-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-5853.jpg", ratio: 0.7500 },
+  { src: "/photography-img-4730.jpg", ratio: 1.3333 },
+  { src: "/photography-img-4620.jpg", ratio: 0.7500 },
+  { src: "/photography-img-4375.jpg", ratio: 0.5623 },
+  { src: "/photography-img-4373.jpg", ratio: 3.5991 },
+  { src: "/photography-img-4344.jpg", ratio: 0.7500 },
+  { src: "/photography-img-4252.jpg", ratio: 0.7500 },
+  { src: "/photography-img-4076.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3987.avif", thumb: "/photography-img-3987-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3980.avif", thumb: "/photography-img-3980-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3976.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3849.avif", thumb: "/photography-img-3849-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3844.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3841.jpg", ratio: 0.5623 },
+  { src: "/photography-img-3825.jpg", ratio: 2.3645 },
+  { src: "/photography-img-3733.jpg", ratio: 0.6250 },
+  { src: "/photography-img-3638.avif", thumb: "/photography-img-3638-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-2162.avif", thumb: "/photography-img-2162-thumb.jpg", ratio: 0.7145 },
+  { src: "/photography-img-2747.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3038.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3072.avif", thumb: "/photography-img-3072-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3074.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3091.avif", thumb: "/photography-img-3091-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3111.avif", thumb: "/photography-img-3111-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-3123.avif", thumb: "/photography-img-3123-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-img-1405.avif", thumb: "/photography-img-1405-thumb.jpg", ratio: 0.7500 },
+  { src: "/photography-p9a5417.avif", thumb: "/photography-p9a5417-thumb.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a5398.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a5276-edit.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a5266.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a5241.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a5218-2-edit.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a5022.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4947.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4890.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4853.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4795.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4615.jpg", ratio: 0.6668 },
+  { src: "/photography-img-1374.avif", thumb: "/photography-img-1374-thumb.jpg", ratio: 1.3333 },
+  { src: "/photography-p9a4182.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4169.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4151.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4144.avif", thumb: "/photography-p9a4144-thumb.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4141.avif", thumb: "/photography-p9a4141-thumb.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4134.jpg", ratio: 1.4997 },
+  { src: "/photography-p9a4131-enhanced-nr.avif", thumb: "/photography-p9a4131-enhanced-nr-thumb.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4122.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4121.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4117.avif", thumb: "/photography-p9a4117-thumb.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4113.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4112-enhanced-nr.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4111-enhanced-nr.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4105.jpg", ratio: 0.6668 },
+  { src: "/photography-p9a4026.jpg", ratio: 1.4997 },
+  { src: "/photography-0p9a3398.avif", thumb: "/photography-0p9a3398-thumb.jpg", ratio: 0.6668 },
+  { src: "/photography-0p9a3391.avif", thumb: "/photography-0p9a3391-thumb.jpg", ratio: 0.6668 },
+  { src: "/photography-0p9a3380.avif", thumb: "/photography-0p9a3380-thumb.jpg", ratio: 0.6668 },
+  { src: "/photography-0p9a3361.jpg", ratio: 1.4997 },
+  { src: "/photography-0p9a3355.jpg", ratio: 1.4997 },
+  { src: "/photography-img-1294.jpg", ratio: 0.6668 },
+  { src: "/photography-img-1287.jpg", ratio: 0.6668 },
+  { src: "/photography-img-1283.jpg", ratio: 0.7500 },
+  { src: "/photography-asset0003.jpg", ratio: 0.6660 },
+];
+---
+
+<ArtDesignLayout
+  backUrl="/art-design"
+  pageTitle="Photography"
+  pageDescription="A selection of the best photographs taken by Zane Devlin."
+  hideHeaderBack
+>
+  <div class="project-page">
+    <div class="project-title-row">
+      <a href="/art-design" class="project-back-link">← Back</a>
+      <div class="project-page-title-bar">Photography</div>
+    </div>
+    <ProjectSlider slides={images} album justified albumOpensViewer client:load />
+    <div class="project-page-body">
+      <div class="project-meta">
+        <span class="project-type">Photography</span>
+        <span class="project-date">2023-2025</span>
+      </div>
+      <p class="project-page-description">A selection of my best photographs, newest first.</p>
+    </div>
+  </div>
+</ArtDesignLayout>
